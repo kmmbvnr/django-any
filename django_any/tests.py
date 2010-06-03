@@ -5,7 +5,8 @@ from django.test import TestCase
 from django.db import models
 from django.contrib.auth.models import User
 
-from models import any_model
+from django_any import fields
+from django_any.models import any_model
 
 class SimpleModel(models.Model):
     name = models.CharField(max_length=5)
@@ -37,12 +38,26 @@ class TestAnyModel(TestCase):
         self.assertEqual('SimpleName', result.simple.name)
 
 
+class TestChoiceSelection(TestCase):
+    def test_one_case_selection(self):
+        field = models.BooleanField(choices=[(False, 'This sentence is wrong')])
+        result = fields.any(field)
+        assert type(result) == bool
+        assert result is False     
+
+    def test_two_case_selection(self):
+        field = models.CharField(max_length=3, choices=[('YNG', 'Child'),
+                                                        ('OLD', 'Parent')])
+        result = fields.any(field)
+        assert type(result) == str
+        assert result in ['YNG', 'OLD']
+
+
 def suite():
     suite = TestSuite()
     suite.addTest(defaultTestLoader.loadTestsFromTestCase(TestAnyModel))
     suite.addTest(doctest.DocTestSuite('django_any.xunit'))
     suite.addTest(doctest.DocTestSuite('django_any.fields'))
+    suite.addTest(doctest.DocTestSuite('django_any.multimethod'))
     
     return suite
-
-

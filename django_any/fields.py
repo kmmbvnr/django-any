@@ -2,10 +2,23 @@
 """
 Values generators for common Django Fields
 """
-from django.db import models
-from multimethod import multimethod
+import random
 from decimal import Decimal
+from django.db import models
+
 import xunit
+from multimethod import multimethod, multimethod_decorator
+
+@multimethod_decorator
+def any(function):
+    """
+    Selection from field.choices 
+    """
+    def wrapper(field, **kwargs):
+        if field.choices:
+            return random.choice([choice[0] for choice in field.choices])
+        return function(field, **kwargs)
+    return wrapper
 
 
 @multimethod(models.BooleanField)
