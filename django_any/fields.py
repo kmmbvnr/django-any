@@ -21,6 +21,18 @@ def any(function):
     return wrapper
 
 
+@multimethod_decorator
+def any(function):
+    """
+    Sometimes return None if field could be blank
+    """
+    def wrapper(field, **kwargs):
+        if field.blank and random.random < 0.1:
+            return None
+        return function(field, **kwargs)
+    return wrapper
+
+
 @multimethod(models.BooleanField)
 def any(field, **kwargs):
     """
