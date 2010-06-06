@@ -2,10 +2,18 @@
 __registry = {}
 
 class MultiMethod(object):
-    def __init__(self, name):
+    """
+    Multimetod dispatcher
+    """
+    def __init__(self, name, module):
         self.name = name
         self.typemap = {}
         self.decorators = []
+        
+        # replacer for real functions, doctest accomulator
+        self.caller = lambda *args, **kwargs: self(*args, **kwargs)
+        self.caller.__module__ = module
+        self.caller.__doc__ = self.__doc__
 
     def __call__(self, *args, **kwargs):
         types = tuple(arg.__class__ for arg in args)
@@ -23,6 +31,8 @@ class MultiMethod(object):
         if types in self.typemap:
             raise TypeError("duplicate registration")
         self.typemap[types] = function
+        if function.__doc__:
+            self.caller.__doc__ += function.__doc__
 
     def register_decorator(self, decorator):
         self.decorators.append(decorator)
@@ -47,9 +57,9 @@ def multimethod(*types):
         name = function.__name__
         mm = __registry.get(name)
         if mm is None:
-            mm = __registry[name] = MultiMethod(name)
+            mm = __registry[name] = MultiMethod(name, function.__module__)
         mm.register(types, function)
-        return mm
+        return mm.caller
     return register
 
 
@@ -83,9 +93,9 @@ def multimethod_decorator(function):
     name = function.__name__
     mm = __registry.get(name)
     if mm is None:
-        mm = __registry[name] = MultiMethod(name)
+        mm = __registry[name] = MultiMethod(name, function.__module__)
     mm.register_decorator(function)
-    return mm
+    return mm.caller
 
 
 if __name__ == "__main__":

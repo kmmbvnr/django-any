@@ -25,6 +25,10 @@ def any(function):
 def any(field, **kwargs):
     """
     Return random value for BooleanField
+
+    >>> result = any(models.BooleanField())
+    >>> type(result)
+    <type 'bool'>
     """
     return xunit.any_boolean()
 
@@ -45,6 +49,13 @@ def any(field, **kwargs):
 
 @multimethod(models.CharField)
 def any(field, **kwargs):
+    """
+    Return random value for CharField
+
+    >>> result = any(models.CharField(max_length=10))
+    >>> type(result)
+    <type 'str'>
+    """
     return xunit.any_string(min_length=1, max_length=field.max_length)
 
 
@@ -65,12 +76,4 @@ def any(field, **kwargs):
                          xunit.any_string(min_length=2, max_length=3))
 
 
-__test__ = {"common":
-"""
->>> result = any(models.BooleanField())
->>> type(result)
-<type 'bool'>
->>> result = any(models.CharField(max_length=10))
->>> type(result)
-<type 'str'>
-"""}
+
