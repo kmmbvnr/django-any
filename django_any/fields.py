@@ -1,13 +1,15 @@
 #-*- coding: utf-8 -*-
+# pylint: disable=E0102
 """
 Values generators for common Django Fields
 """
+
 import random
 from decimal import Decimal
 from django.db import models
 
-import xunit
-from multimethod import multimethod, multimethod_decorator
+from django_any import xunit
+from django_any.multimethod import multimethod, multimethod_decorator
 
 @multimethod_decorator
 def any_field(function):
@@ -34,7 +36,7 @@ def any_field(function):
     def _valid_choices(choices):
         for key, value in choices:
             if isinstance(value, (list, tuple)):
-                for key, item in value:
+                for key, _ in value:
                     yield key
             else:
                 yield key
@@ -61,11 +63,27 @@ def any_field(field, **kwargs):
 
 @multimethod(models.PositiveIntegerField)
 def any_field(field, **kwargs):
-    xunit.any_int(min_value=0, max_value=9999)
+    """
+    An positive integer
+
+    >>> result = any_field(models.PositiveIntegerField())
+    >>> type(result)
+    <type 'int'>
+    >>> result > 0
+    True
+    """
+    return xunit.any_int(min_value=1, max_value=9999)
 
 
 @multimethod(models.DecimalField)
 def any_field(field, **kwargs):
+    """
+    Decimal value
+
+    >>> result = any_field(models.DecimalField(max_digits=5, decimal_places=2))
+    >>> type(result)
+    <class 'decimal.Decimal'>
+    """
     min_value = 0
     max_value = Decimal('%s.%s' % ('9'*(field.max_digits-field.decimal_places),
                                    '9'*field.decimal_places))

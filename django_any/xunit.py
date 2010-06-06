@@ -2,7 +2,8 @@
 """
 The python basic types generators
 """
-import string, random
+import random
+from string import ascii_letters
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
@@ -66,32 +67,32 @@ def any_float(min_value=0, max_value=100, presision=2):
     return round(random.uniform(min_value, max_value),2)
 
 
-def any_letter(letters = string.letters, **kwargs):
+def any_letter(letters = ascii_letters, **kwargs):
     """
     Return random letter
 
-    >>> result = any_letter(letters = string.letters)
+    >>> result = any_letter(letters = ascii_letters)
     >>> type(result)
     <type 'str'>
     >>> len(result)
     1
-    >>> result in string.letters
+    >>> result in ascii_letters
     True
 
     """
     return random.choice(letters)
 
 
-def any_string(letters = string.letters, min_length=3, max_length=100):
+def any_string(letters = ascii_letters, min_length=3, max_length=100):
     """
     Return string with random content
 
-    >>> result = any_string(letters = string.letters, min_length=3, max_length=100)
+    >>> result = any_string(letters = ascii_letters, min_length=3, max_length=100)
     >>> type(result)
     <type 'str'>
     >>> len(result) in range(3,101)
     True
-    >>> any([c in string.letters for c in result])
+    >>> any([c in ascii_letters for c in result])
     True
     """
     
