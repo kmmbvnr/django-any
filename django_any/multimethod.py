@@ -8,10 +8,9 @@ class MultiMethod(object):
     def __init__(self, name, module):
         self.name = name
         self.typemap = {}
-        self.decorators = []
-        
+
         # replacer for real functions, doctest accomulator
-        self.caller = lambda *args, **kwargs: self(*args, **kwargs)
+        self.caller = lambda *args, **kwargs: self.__call__(*args, **kwargs)
         self.caller.__module__ = module
         self.caller.__doc__ = self.__doc__
 
@@ -21,9 +20,6 @@ class MultiMethod(object):
 
         if function is None:
             raise TypeError("no match %s" % types)
-
-        for decorator in self.decorators:
-            function = decorator(function)
 
         return function(*args, **kwargs)
 
@@ -35,7 +31,7 @@ class MultiMethod(object):
             self.caller.__doc__ += function.__doc__
 
     def register_decorator(self, decorator):
-        self.decorators.append(decorator)
+        self.__call__ = decorator(self.__call__)
 
 
 def multimethod(*types):
