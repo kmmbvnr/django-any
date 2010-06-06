@@ -32,6 +32,7 @@ class MultiMethod(object):
 
     def register_decorator(self, decorator):
         self.__call__ = decorator(self.__call__)
+        self.caller.__doc__ += (decorator.__doc__ or "")
 
 
 def multimethod(*types):

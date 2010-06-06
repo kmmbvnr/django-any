@@ -12,11 +12,11 @@ from multimethod import multimethod, multimethod_decorator
 @multimethod_decorator
 def any(function):
     """
-    Selection from field.choices 
+    Sometimes return None if field could be blank
     """
     def wrapper(field, **kwargs):
-        if field.choices:
-            return random.choice([choice[0] for choice in field.choices])
+        if field.blank and random.random < 0.1:
+            return None
         return function(field, **kwargs)
     return wrapper
 
@@ -24,12 +24,26 @@ def any(function):
 @multimethod_decorator
 def any(function):
     """
-    Sometimes return None if field could be blank
+    Selection from field.choices
+
+    >>> CHOICES = [('YNG', 'Child'), ('OLD', 'Parent')]
+    >>> result = any(models.CharField(max_length=3, choices=CHOICES))
+    >>> result in ['YNG', 'OLD']
+    True
     """
+    def _valid_choices(choices):
+        for key, value in choices:
+            if isinstance(value, (list, tuple)):
+                for key, item in value:
+                    yield key
+            else:
+                yield key
+
     def wrapper(field, **kwargs):
-        if field.blank and random.random < 0.1:
-            return None
+        if field.choices:
+            return random.choice(list(_valid_choices(field.choices)))
         return function(field, **kwargs)
+
     return wrapper
 
 
