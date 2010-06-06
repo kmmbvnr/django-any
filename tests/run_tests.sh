@@ -37,6 +37,7 @@ class TestSettings(conf.UserSettingsHolder):
    DATABASE_ENGINE='sqlite3'
    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
    NOSE_ARGS = ['django_any',
+                '--with-doctest',
                 '--with-coverage',
                 '--cover-package=django_any',
                 '--with-xunit',
