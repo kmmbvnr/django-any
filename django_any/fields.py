@@ -10,7 +10,7 @@ import xunit
 from multimethod import multimethod, multimethod_decorator
 
 @multimethod_decorator
-def any(function):
+def any_field(function):
     """
     Sometimes return None if field could be blank
     """
@@ -22,12 +22,12 @@ def any(function):
 
 
 @multimethod_decorator
-def any(function):
+def any_field(function):
     """
     Selection from field.choices
 
     >>> CHOICES = [('YNG', 'Child'), ('OLD', 'Parent')]
-    >>> result = any(models.CharField(max_length=3, choices=CHOICES))
+    >>> result = any_field(models.CharField(max_length=3, choices=CHOICES))
     >>> result in ['YNG', 'OLD']
     True
     """
@@ -48,11 +48,11 @@ def any(function):
 
 
 @multimethod(models.BooleanField)
-def any(field, **kwargs):
+def any_field(field, **kwargs):
     """
     Return random value for BooleanField
 
-    >>> result = any(models.BooleanField())
+    >>> result = any_field(models.BooleanField())
     >>> type(result)
     <type 'bool'>
     """
@@ -60,12 +60,12 @@ def any(field, **kwargs):
 
 
 @multimethod(models.PositiveIntegerField)
-def any(field, **kwargs):
+def any_field(field, **kwargs):
     xunit.any_int(min_value=0, max_value=9999)
 
 
 @multimethod(models.DecimalField)
-def any(field, **kwargs):
+def any_field(field, **kwargs):
     min_value = 0
     max_value = Decimal('%s.%s' % ('9'*(field.max_digits-field.decimal_places),
                                    '9'*field.decimal_places))
@@ -74,11 +74,11 @@ def any(field, **kwargs):
 
 
 @multimethod(models.CharField)
-def any(field, **kwargs):
+def any_field(field, **kwargs):
     """
     Return random value for CharField
 
-    >>> result = any(models.CharField(max_length=10))
+    >>> result = any_field(models.CharField(max_length=10))
     >>> type(result)
     <type 'str'>
     """
@@ -86,20 +86,18 @@ def any(field, **kwargs):
 
 
 @multimethod(models.DateField)
-def any(field, **kwargs):
+def any_field(field, **kwargs):
     return xunit.any_date()
 
 
 @multimethod(models.DateTimeField)
-def any(field, **kwargs):
+def any_field(field, **kwargs):
     return xunit.any_datetime()
 
 
 @multimethod(models.EmailField)
-def any(field, **kwargs):
+def any_field(field, **kwargs):
     return "%s@%s.%s" % (xunit.any_string(max_length=10),
                          xunit.any_string(max_length=10),
                          xunit.any_string(min_length=2, max_length=3))
-
-
 

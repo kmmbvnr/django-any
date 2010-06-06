@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
 from django.db import models
-from django_any import fields
+from django_any.fields import any_field
 
 class TestChoiceSelection(TestCase):
     """
@@ -13,7 +13,7 @@ class TestChoiceSelection(TestCase):
         Even there is only one choice, it should be returned always
         """
         field = models.BooleanField(choices=[(False, 'This sentence is wrong')])
-        result = fields.any(field)
+        result = any_field(field)
         self.assertEqual(bool, type(result))
         self.assertEqual(False, result)
 
@@ -33,6 +33,6 @@ class TestChoiceSelection(TestCase):
             ('unknown', 'Unknown'))
         
         media = models.CharField(max_length=25, choices=MEDIA_CHOICES)
-        result = fields.any(media)
+        result = any_field(media)
         self.assertTrue(result in ['vinyl', 'cd', 'vhs', 'dvd', 'unknown'])
 

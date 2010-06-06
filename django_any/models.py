@@ -2,18 +2,18 @@
 from collections import defaultdict
 from django.db import models
 
-from django_any import fields, xunit
+from django_any.xunit import any_boolean
+from django_any.fields import any_field
 from django_any.multimethod import multimethod
 
-
 @multimethod(models.ForeignKey)
-def any(field, **kwargs):
-    if field.null and xunit.any_boolean():
+def any_field(field, **kwargs):
+    if field.null and any_boolean():
         return None
     return any_model(field.rel.to, **kwargs)
 
 
-def split_model_kwargs(kw):
+def _split_model_kwargs(kw):
     model_fields = {}
     fields_agrs = defaultdict(lambda : {})
     
@@ -30,12 +30,12 @@ def split_model_kwargs(kw):
 def any_model(model_cls, **kwargs):
     result = model_cls()
 
-    model_fields, fields_args = split_model_kwargs(kwargs)
+    model_fields, fields_args = _split_model_kwargs(kwargs)
     for field in model_cls._meta.fields:
         if field.name in model_fields:
             setattr(result, field.name, kwargs[field.name])
         elif not isinstance(field, models.fields.AutoField):
-            setattr(result, field.name, fields.any(field, **fields_args[field.name]))
+            setattr(result, field.name, any_field(field, **fields_args[field.name]))
 
     result.save()
     return result
