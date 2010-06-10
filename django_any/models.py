@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 from collections import defaultdict
-from django.db import models
+from django.db import models, IntegrityError
 
 from django_any.xunit import any_boolean
 from django_any.fields import any_field
@@ -27,16 +27,27 @@ def _split_model_kwargs(kw):
     return model_fields, fields_agrs
     
 
+def _fill_model_fields(model, **kwargs):
+    model_fields, fields_args = _split_model_kwargs(kwargs)
+    for field in model._meta.fields:
+        if field.name in model_fields:
+            setattr(model, field.name, kwargs[field.name])
+        elif not isinstance(field, models.fields.AutoField):
+            setattr(model, field.name, any_field(field, **fields_args[field.name]))
+
+
 def any_model(model_cls, **kwargs):
     result = model_cls()
+    
+    attempts = 10
+    while True:
+        try:
+            _fill_model_fields(result, **kwargs)
+            result.save()
+            return result
+        except IntegrityError:
+            attempts -=1
+            if not attempts:
+                raise
 
-    model_fields, fields_args = _split_model_kwargs(kwargs)
-    for field in model_cls._meta.fields:
-        if field.name in model_fields:
-            setattr(result, field.name, kwargs[field.name])
-        elif not isinstance(field, models.fields.AutoField):
-            setattr(result, field.name, any_field(field, **fields_args[field.name]))
-
-    result.save()
-    return result
 
