@@ -11,8 +11,8 @@ from django.db import models
 from django_any import xunit
 from django_any.multimethod import multimethod, multimethod_decorator
 
-@multimethod_decorator
-def any_field(function):
+@multimethod_decorator('any_field')
+def any_field_blank(function):
     """
     Sometimes return None if field could be blank
     """
@@ -23,8 +23,8 @@ def any_field(function):
     return wrapper
 
 
-@multimethod_decorator
-def any_field(function):
+@multimethod_decorator('any_field')
+def any_field_choices(function):
     """
     Selection from field.choices
 

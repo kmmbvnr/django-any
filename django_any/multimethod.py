@@ -60,12 +60,12 @@ def multimethod(*types):
     return register
 
 
-def multimethod_decorator(function):
+def multimethod_decorator(method_name):
     """
     Decorator for multimetod decorators registration
 
-    >>> @multimethod_decorator
-    ... def test_decorated(function):
+    >>> @multimethod_decorator('test_decorated')
+    ... def test_decorator(function):
     ...      def wrapper(*args, **kwargs):
     ...           print "BEFORE"
     ...           result = function(*args, **kwargs)
@@ -87,12 +87,13 @@ def multimethod_decorator(function):
     STRING
     AFTER
     """
-    name = function.__name__
-    mm = __registry.get(name)
-    if mm is None:
-        mm = __registry[name] = MultiMethod(name, function.__module__)
-    mm.register_decorator(function)
-    return mm.caller
+    def register(function):
+        mm = __registry.get(method_name)
+        if mm is None:
+            mm = __registry[method_name] = MultiMethod(method_name, function.__module__)
+        mm.register_decorator(function)
+        return mm.caller
+    return register
 
 
 if __name__ == "__main__":
