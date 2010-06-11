@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 from collections import defaultdict
+from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
 
 from django_any.xunit import any_boolean
@@ -43,11 +44,11 @@ def any_model(model_cls, **kwargs):
     while True:
         try:
             _fill_model_fields(result, **kwargs)
-            result.save()
+            result.full_clean()
+            result.save()            
             return result
-        except IntegrityError:
+        except (IntegrityError, ValidationError):
             attempts -=1
             if not attempts:
                 raise
-
 
