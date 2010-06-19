@@ -103,7 +103,7 @@ def any_field(field, **kwargs):
 def any_field(field, **kwargs):
     """
     Return random value for CharField
-
+    
     >>> result = any_field(models.CommaSeparatedIntegerField(max_length=10))
     >>> type(result)
     <type 'str'>
@@ -115,10 +115,38 @@ def any_field(field, **kwargs):
     return ",".join(nums)
 
 
+@multimethod(models.DateField)
+def any_field(field, **kwargs):
+    """
+    Return random value for DateField, 
+    skips auto_now and auto_now_add fields
+
+    >>> result = any_field(models.DateField())
+    >>> type(result)
+    <type 'datetime.date'>
+    """
+    if field.auto_now or field.auto_now_add:
+        return None
+    return xunit.any_date()
+
+
+@multimethod(models.DateTimeField)
+def any_field(field, **kwargs):
+    """
+    Return random value for DateTimeField, 
+    skips auto_now and auto_now_add fields
+
+    >>> result = any_field(models.DateTimeField())
+    >>> type(result)
+    <type 'datetime.datetime'>
+    """
+    return xunit.any_datetime()
+
+
 @multimethod(models.DecimalField)
 def any_field(field, **kwargs):
     """
-    Decimal value
+    Return random value for DecimalField
 
     >>> result = any_field(models.DecimalField(max_digits=5, decimal_places=2))
     >>> type(result)
@@ -131,18 +159,18 @@ def any_field(field, **kwargs):
                              decimal_places = field.decimal_places)
 
 
-@multimethod(models.DateField)
-def any_field(field, **kwargs):
-    return xunit.any_date()
-
-
-@multimethod(models.DateTimeField)
-def any_field(field, **kwargs):
-    return xunit.any_datetime()
-
-
 @multimethod(models.EmailField)
 def any_field(field, **kwargs):
+    """
+    Return random value for EmailField
+
+    >>> result = any_field(models.EmailField())
+    >>> type(result)
+    <type 'str'>
+    >>> import re
+    >>> re.match(r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)", result, re.IGNORECASE) is not None
+    True
+    """
     return "%s@%s.%s" % (xunit.any_string(max_length=10),
                          xunit.any_string(max_length=10),
                          xunit.any_string(min_length=2, max_length=3))
