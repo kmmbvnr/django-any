@@ -49,6 +49,18 @@ def any_field_choices(function):
     return wrapper
 
 
+@multimethod(models.BigIntegerField)
+def any_field(field, **kwargs):
+    """
+    Return random value for BigIntegerField
+
+    >>> result = any_field(models.BigIntegerField())
+    >>> type(result)
+    <type 'long'>
+    """
+    return long(xunit.any_int(min_value=1, max_value=10**20))
+
+
 @multimethod(models.BooleanField)
 def any_field(field, **kwargs):
     """
