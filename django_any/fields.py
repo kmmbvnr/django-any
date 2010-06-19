@@ -87,6 +87,34 @@ def any_field(field, **kwargs):
     return xunit.any_int(min_value=1, max_value=9999)
 
 
+@multimethod(models.CharField)
+def any_field(field, **kwargs):
+    """
+    Return random value for CharField
+
+    >>> result = any_field(models.CharField(max_length=10))
+    >>> type(result)
+    <type 'str'>
+    """
+    return xunit.any_string(min_length=1, max_length=field.max_length)
+
+
+@multimethod(models.CommaSeparatedIntegerField)
+def any_field(field, **kwargs):
+    """
+    Return random value for CharField
+
+    >>> result = any_field(models.CommaSeparatedIntegerField(max_length=10))
+    >>> type(result)
+    <type 'str'>
+    >>> [int(num) for num in result.split(',')] and 'OK'
+    'OK'
+    """
+    nums_count = field.max_length/2
+    nums = [str(xunit.any_int(min_value=0, max_value=9)) for _ in xrange(0, nums_count)]
+    return ",".join(nums)
+
+
 @multimethod(models.DecimalField)
 def any_field(field, **kwargs):
     """
@@ -101,18 +129,6 @@ def any_field(field, **kwargs):
                                    '9'*field.decimal_places))
     return xunit.any_decimal(min_value=min_value, max_value=max_value,
                              decimal_places = field.decimal_places)
-
-
-@multimethod(models.CharField)
-def any_field(field, **kwargs):
-    """
-    Return random value for CharField
-
-    >>> result = any_field(models.CharField(max_length=10))
-    >>> type(result)
-    <type 'str'>
-    """
-    return xunit.any_string(min_length=1, max_length=field.max_length)
 
 
 @multimethod(models.DateField)
