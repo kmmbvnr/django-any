@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-# pylint: disable=E0102
+# pylint: disable=E0102, W0613
 """
 Values generators for common Django Fields
 """
