@@ -210,5 +210,16 @@ def any_field(field, **kwargs):
     """
     return random.choice([None, True, False])
 
+@multimethod(models.PositiveSmallIntegerField)
+def any_field(field, **kwargs):
+    """
+    Return random value for PositiveSmallIntegerField
+    >>> result = any_field(models.PositiveSmallIntegerField())
+    >>> type(result)
+    <type 'int'>
+    >>> result < 256, result > 0
+    (True, True)
+    """
+    return xunit.any_int(min_value=1, max_value=255)
 
     
