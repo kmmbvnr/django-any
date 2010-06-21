@@ -236,3 +236,15 @@ def any_field(field, **kwargs):
     import string
     letters = string.letters + '_' + '-' + '0123456789' 
     return xunit.any_string(letters = letters, max_length = field.max_length)
+
+@multimethod(models.SmallIntegerField)
+def any_field(field, **kwargs):
+    """
+    Return random value for SmallIntegerValue
+    >>> result = any_field(models.SmallIntegerField())
+    >>> type(result)
+    <type 'int'>
+    >>> result > -256, result < 256
+    (True, True)
+    """
+    return xunit.any_int(min_value=-255, max_value=255)
