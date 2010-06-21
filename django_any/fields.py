@@ -248,3 +248,13 @@ def any_field(field, **kwargs):
     (True, True)
     """
     return xunit.any_int(min_value=-255, max_value=255)
+
+@multimethod(models.IntegerField)
+def any_field(field, **kwargs):
+    """
+    Return random value for IntegerField
+    >>> result = any_field(models.IntegerField())
+    >>> type(result)
+    <type 'int'>
+    """
+    return xunit.any_int(min_value=-10000, max_value=10000)
