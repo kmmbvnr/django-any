@@ -222,4 +222,17 @@ def any_field(field, **kwargs):
     """
     return xunit.any_int(min_value=1, max_value=255)
 
-    
+@multimethod(models.SlugField)
+def any_field(field, **kwargs):
+    """
+    Return random value for SlugField
+    >>> result = any_field(models.SlugField(max_length=20))
+    >>> type(result)
+    <type 'str'>
+    >>> import re
+    >>> re.match(r"[-a-z-A-Z-0-9_-]", result) is not None
+    True
+    """
+    import string
+    letters = string.letters + '_' + '-' + '0123456789' 
+    return xunit.any_string(letters = letters, max_length = field.max_length)
