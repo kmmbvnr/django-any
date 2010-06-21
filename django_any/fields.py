@@ -258,3 +258,14 @@ def any_field(field, **kwargs):
     <type 'int'>
     """
     return xunit.any_int(min_value=-10000, max_value=10000)
+
+@multimethod(models.TextField)
+def any_field(field, **kwargs):
+    """
+    Return random 'lorem ipsum' Latin text
+    >>> result = any_field(models.TextField())
+    >>> from django.contrib.webdesign.lorem_ipsum import COMMON_P
+    >>> result = COMMON_P
+    """
+    from django.contrib.webdesign.lorem_ipsum import *
+    return paragraphs(10)
