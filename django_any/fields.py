@@ -7,7 +7,7 @@ Values generators for common Django Fields
 import random
 from decimal import Decimal
 from django.db import models
-
+from django.core.validators import ipv4_re
 from django_any import xunit
 from django_any.multimethod import multimethod, multimethod_decorator
 
@@ -175,3 +175,28 @@ def any_field(field, **kwargs):
                          xunit.any_string(max_length=10),
                          xunit.any_string(min_length=2, max_length=3))
 
+@multimethod(models.FloatField)
+def any_field(field, **kwargs):
+    """
+    Return random value for FloatField
+
+    >>> result = any_field(models.FloatField())
+    >>> type(result)
+    <type 'float'>
+    """
+    return xunit.any_float(min_value=1, max_value=100, precision=3)
+
+@multimethod(models.IPAddressField)
+def any_field(field, **kwargs):
+    """
+    Return random value for IPAddressField
+    >>> result = any_field(models.IPAddressField())
+    >>> type(result)
+    <type 'str'>
+    >>> import re
+    >>> re.match(ipv4_re, result) is not None
+    True
+    """
+    nums = [str(xunit.any_int(min_value=0, max_value=255)) for _ in xrange(0,4)]
+    return ".".join(nums)
+    

@@ -53,18 +53,18 @@ def any_int(min_value=0, max_value=100, **kwargs):
     return random.randint(min_value, max_value)
 
 
-def any_float(min_value=0, max_value=100, presision=2):
+def any_float(min_value=0, max_value=100, precision=2):
     """
     Returns random float
     
-    >>> result = any_float(min_value=0, max_value=100, presision=2)
+    >>> result = any_float(min_value=0, max_value=100, precision=2)
     >>> type(result)
     <type 'float'>
     >>> result >=0 and result <= 100
     True
 
     """
-    return round(random.uniform(min_value, max_value),2)
+    return round(random.uniform(min_value, max_value), precision)
 
 
 def any_letter(letters = ascii_letters, **kwargs):
@@ -144,5 +144,5 @@ def any_decimal(min_value=Decimal(0), max_value=Decimal('99.99'), decimal_places
     """
     return Decimal(str(any_float(min_value=float(min_value),
                                  max_value=float(max_value),
-                                 presision=decimal_places)))
+                                 precision=decimal_places)))
 
