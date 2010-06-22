@@ -282,7 +282,14 @@ def any_field(field, **kwargs):
     >>> re.match(URLValidator.regex, result) is not None
     True
     """
-    url = ['http://news.yandex.ru/society.html', 'http://video.google.com/?hl=en&tab=wv', 'http://www.microsoft.com/en/us/default.aspx', 'http://habrahabr.ru/company/opera/', 'http://www.apple.com/support/hardware/', 'http://localhost/', 'http://72.14.221.99', 'http://fr.wikipedia.org/wiki/France']
+    url = ['http://news.yandex.ru/society.html',
+           'http://video.google.com/?hl=en&tab=wv',
+           'http://www.microsoft.com/en/us/default.aspx',
+           'http://habrahabr.ru/company/opera/',
+           'http://www.apple.com/support/hardware/',
+           'http://localhost/',
+           'http://72.14.221.99',
+           'http://fr.wikipedia.org/wiki/France']
     from random import choice
     return choice(url)
 
@@ -296,5 +303,8 @@ def any_field(field, **kwargs):
     
     """
     import datetime
-    return datetime.time(xunit.any_int(min_value=0,max_value=23), xunit.any_int(min_value=0, max_value=59), xunit.any_int(min_value=0, max_value=59))
-    
+    return datetime.time(
+        xunit.any_int(min_value=0, max_value=23),
+        xunit.any_int(min_value=0, max_value=59), 
+        xunit.any_int(min_value=0, max_value=59))
+
