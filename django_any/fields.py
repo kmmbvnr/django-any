@@ -229,8 +229,9 @@ def any_field(field, **kwargs):
     >>> result = any_field(models.SlugField())
     >>> type(result)
     <type 'str'>
+    >>> from django.core.validators import slug_re
     >>> import re
-    >>> re.match(r"[-a-z-A-Z-0-9_-]", result) is not None
+    >>> re.match(slug_re, result) is not None
     True
     """
     from string import ascii_letters, digits
@@ -270,3 +271,17 @@ def any_field(field, **kwargs):
     """
     from django.contrib.webdesign.lorem_ipsum import paragraphs
     return paragraphs(10)
+
+@multimethod(models.URLField)
+def any_field(field, **kwargs):
+    """
+    Return random value for URLField
+    >>> result = any_field(models.URLField())
+    >>> from django.core.validators import URLValidator
+    >>> import re
+    >>> re.match(URLValidator.regex, result) is not None
+    True
+    """
+    url = ['http://news.yandex.ru/society.html', 'http://video.google.com/?hl=en&tab=wv', 'http://www.microsoft.com/en/us/default.aspx', 'http://habrahabr.ru/company/opera/', 'http://www.apple.com/support/hardware/', 'http://localhost/', 'http://72.14.221.99', 'http://fr.wikipedia.org/wiki/France']
+    from random import choice
+    return choice(url)
