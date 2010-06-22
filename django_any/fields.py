@@ -226,15 +226,15 @@ def any_field(field, **kwargs):
 def any_field(field, **kwargs):
     """
     Return random value for SlugField
-    >>> result = any_field(models.SlugField(max_length=20))
+    >>> result = any_field(models.SlugField())
     >>> type(result)
     <type 'str'>
     >>> import re
     >>> re.match(r"[-a-z-A-Z-0-9_-]", result) is not None
     True
     """
-    import string
-    letters = string.letters + '_' + '-' + '0123456789' 
+    from string import ascii_letters, digits
+    letters = ascii_letters + digits + '_-' 
     return xunit.any_string(letters = letters, max_length = field.max_length)
 
 @multimethod(models.SmallIntegerField)
@@ -265,7 +265,8 @@ def any_field(field, **kwargs):
     Return random 'lorem ipsum' Latin text
     >>> result = any_field(models.TextField())
     >>> from django.contrib.webdesign.lorem_ipsum import COMMON_P
-    >>> result = COMMON_P
+    >>> result[0] == COMMON_P
+    True
     """
-    from django.contrib.webdesign.lorem_ipsum import *
+    from django.contrib.webdesign.lorem_ipsum import paragraphs
     return paragraphs(10)
