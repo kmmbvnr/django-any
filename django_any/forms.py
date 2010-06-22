@@ -3,6 +3,7 @@
 Django forms data generators
 
 """
+import random
 from django import forms
 from django_any import xunit
 
@@ -29,11 +30,12 @@ class FormFieldDataFactory(object):
             return _wrapper(func)
         return _wrapper
     
-    def decorator(self, impl=None):
+    def decorator(self, impl):
         """
         Decorator for register decorators
         """
         self.__call__ = impl(self.__call__)
+        return impl
 
     def __call__(self, *args, **kwargs):
         if not len(args):
@@ -49,6 +51,22 @@ class FormFieldDataFactory(object):
         return function(*args, **kwargs)
 
 any_form_field = FormFieldDataFactory()
+
+
+@any_form_field.decorator
+def field_required_attribute(function):
+    """
+    Sometimes return None if field is not required
+
+    >>> result = any_form_field(forms.BooleanField(required=False))
+    >>> result in [None, True, False]
+    True
+    """
+    def _wrapper(field, **kwargs):
+        if not field.required and random.random < 0.1:
+            return None
+        return function(field, **kwargs)
+    return _wrapper
 
 
 @any_form_field.register(forms.BooleanField)
