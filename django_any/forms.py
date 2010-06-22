@@ -80,3 +80,15 @@ def boolean_field_data(field, **kwargs):
     """
     return xunit.any_boolean()
 
+
+@any_form_field.register(forms.CharField)
+def char_field_data(field, **kwargs):
+    """
+    Return random value for CharField
+    >>> result = any_form_field(forms.CharField())
+    >>> type(result)
+    <type 'str'>
+    """
+    return xunit.any_string(min_length=field.min_length or 1, 
+                            max_length=field.max_length or 255)
+
