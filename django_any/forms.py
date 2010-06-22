@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=W0613, C0103
 """
 Django forms data generators
 
@@ -27,7 +28,7 @@ class FormFieldDataFactory(object):
             return func
 
         if impl:
-            return _wrapper(func)
+            return _wrapper(impl)
         return _wrapper
     
     def decorator(self, impl):
