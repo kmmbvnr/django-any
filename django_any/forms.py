@@ -86,7 +86,7 @@ def boolean_field_data(field, **kwargs):
 def char_field_data(field, **kwargs):
     """
     Return random value for CharField
-    >>> result = any_form_field(forms.CharField())
+    >>> result = any_form_field(forms.CharField(min_length=3, max_length=10))
     >>> type(result)
     <type 'str'>
     """
@@ -98,15 +98,15 @@ def decimal_field_data(field, **kwargs):
     """
     Return random value for DecimalField
 
-    >>> result = any_form_field(forms.DecimalField(max_value=100, min_value=0, max_digits=4, decimal_places = 2))
+    >>> result = any_form_field(forms.DecimalField(max_value=100, min_value=11, max_digits=4, decimal_places = 2))
     >>> type(result)
     <class 'decimal.Decimal'>
     >>> from decimal import Decimal
-    >>> result >= 0, result <= Decimal('99.99')
+    >>> result >= 11, result <= Decimal('99.99')
     (True, True)
     """
     min_value = 0
-    max_value = 100
+    max_value = 10
     from django.core.validators import MinValueValidator, MaxValueValidator 
     for elem in field.validators:
         if isinstance(elem, MinValueValidator):
@@ -121,6 +121,31 @@ def decimal_field_data(field, **kwargs):
     return xunit.any_decimal(min_value=min_value,
                              max_value=max_value,
                              decimal_places = field.decimal_places or 2)
+
+@any_form_field.register(forms.EmailField)
+def email_field_data(field, **kwargs):
+    """
+    Return random value for EmailField
+
+    >>> result = any_form_field(forms.EmailField(min_length=10, max_length=30))
+    >>> type(result)
+    <type 'str'>
+    >>> len(result) <= 30, len(result) >= 10
+    (True, True)
+    """
+    max_length = 10
+    if field.max_length:
+        max_length = (field.max_length -5) / 2 
+    min_length = 10
+    if field.min_length:
+        min_length = (field.min_length-4) / 2 
+    return "%s@%s.%s" % (xunit.any_string(min_length=min_length, max_length=max_length),
+                         xunit.any_string(min_length=min_length, max_length=max_length),
+                         xunit.any_string(min_length=2, max_length=3))
+ 
+    
+
+
 
 
 
