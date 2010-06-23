@@ -93,3 +93,37 @@ def char_field_data(field, **kwargs):
     return xunit.any_string(min_length=field.min_length or 1, 
                             max_length=field.max_length or 255)
 
+@any_form_field.register(forms.DecimalField)
+def decimal_field_data(field, **kwargs):
+    """
+    Return random value for DecimalField
+
+    >>> result = any_form_field(forms.DecimalField(max_value=100, min_value=0, max_digits=4, decimal_places = 2))
+    >>> type(result)
+    <class 'decimal.Decimal'>
+    >>> from decimal import Decimal
+    >>> result >= 0, result <= Decimal('99.99')
+    (True, True)
+    """
+    min_value = 0
+    max_value = 100
+    from django.core.validators import MinValueValidator, MaxValueValidator 
+    for elem in field.validators:
+        if isinstance(elem, MinValueValidator):
+            min_value = elem.limit_value
+        if isinstance(elem, MaxValueValidator):
+            max_value = elem.limit_value
+    if (field.max_digits and field.decimal_places):
+        from decimal import Decimal
+        max_value = min(max_value,
+                        Decimal('%s.%s' % ('9'*(field.max_digits-field.decimal_places),
+                                           '9'*field.decimal_places)))
+    return xunit.any_decimal(min_value=min_value,
+                             max_value=max_value,
+                             decimal_places = field.decimal_places or 2)
+
+
+
+
+
+
