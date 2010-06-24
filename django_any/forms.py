@@ -330,6 +330,7 @@ def time_field_data(field, **kwargs):
     return time
 
 
+@any_form_field.register(forms.TypedChoiceField)
 @any_form_field.register(forms.ChoiceField)
 def choice_field_data(field, **kwargs):
     """
@@ -340,6 +341,9 @@ def choice_field_data(field, **kwargs):
     >>> type(result)
     <type 'str'>
     >>> result in ['YNG', 'OLD']
+    True
+    >>> typed_result = any_form_field(forms.TypedChoiceField(choices=CHOICES))
+    >>> typed_result in ['YNG', 'OLD']
     True
     """
     def _valid_choices(choices):
