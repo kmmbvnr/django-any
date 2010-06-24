@@ -173,7 +173,7 @@ def any_field(field, **kwargs):
     return "%s@%s.%s" % (xunit.any_string(max_length=10),
                          xunit.any_string(max_length=10),
                          xunit.any_string(min_length=2, max_length=3))
-
+ 
 @multimethod(models.FloatField)
 def any_field(field, **kwargs):
     """

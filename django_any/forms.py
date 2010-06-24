@@ -151,17 +151,80 @@ def email_field_data(field, **kwargs):
         max_length = (field.max_length -5) / 2 
     min_length = 10
     if field.min_length:
-        min_length = (field.min_length-4) / 2 
-    return "%s@%s.%s" % (xunit.any_string(min_length=min_length, max_length=max_length),
-                         xunit.any_string(min_length=min_length, max_length=max_length),
-                         xunit.any_string(min_length=2, max_length=3))
- 
-    
+        min_length = (field.min_length-4) / 2
+    return "%s@%s.%s" % (
+        xunit.any_string(min_length=min_length, max_length=max_length),
+        xunit.any_string(min_length=min_length, max_length=max_length),
+        xunit.any_string(min_length=2, max_length=3))
 
+"""@any_form_field.register(forms.DateField)
+def date_field_data(field, **kwargs):
+    """"""
+    Return random value for DateField
 
+    >>> result = any_form_field(forms.DateField(input_formats='%d %B %Y'))
+    >>> type(result)
+    <type 'datetime.date'>
+    """"""
+    date = xunit.any_date()
+    if field.input_formats:
+        date = date.strftime(field.input_formats)
+    return date
+"""
 
+@any_form_field.register(forms.FloatField)
+def float_field_data(field, **kwargs):
+    """
+    Return random value for FloatField
 
+    >>> result = any_form_field(forms.FloatField(max_value=200, min_value=100))
+    >>> type(result)
+    <type 'float'>
+    >>> result >=100, result <=200
+    (True, True)
+    """
+    min_value = 0
+    max_value = 100
+    from django.core.validators import MinValueValidator, MaxValueValidator 
+    for elem in field.validators:
+        if isinstance(elem, MinValueValidator):
+            min_value = elem.limit_value
+        if isinstance(elem, MaxValueValidator):
+            max_value = elem.limit_value
+    return xunit.any_float(min_value=min_value, max_value=max_value, precision=3)
 
+@any_form_field.register(forms.IntegerField)
+def integer_field_data(field, **kwargs):
+    """
+    Return random value for IntegerField
 
+    >>> result = any_form_field(forms.IntegerField(max_value=200, min_value=100))
+    >>> type(result)
+    <type 'int'>
+    >>> result >=100, result <=200
+    (True, True)
+    """
+    min_value = 0
+    max_value = 100
+    from django.core.validators import MinValueValidator, MaxValueValidator 
+    for elem in field.validators:
+        if isinstance(elem, MinValueValidator):
+            min_value = elem.limit_value
+        if isinstance(elem, MaxValueValidator):
+            max_value = elem.limit_value
+    return xunit.any_int(min_value=min_value, max_value=max_value)
 
-
+@any_form_field.register(forms.IPAddressField)
+def ipaddress_field_data(field, **kwargs):
+    """
+    Return random value for IPAddressField
+    >>> result = any_form_field(forms.IPAddressField())
+    >>> type(result)
+    <type 'str'>
+    >>> from django.core.validators import ipv4_re
+    >>> import re
+    >>> re.match(ipv4_re, result) is not None
+    True
+    """
+    nums = [str(xunit.any_int(min_value=0, max_value=255)) for _ in xrange(0, 4)]
+    return ".".join(nums)
