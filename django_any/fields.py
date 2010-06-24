@@ -32,17 +32,11 @@ def any_field_choices(function):
     >>> result in ['YNG', 'OLD']
     True
     """
-    def _valid_choices(choices):
-        for key, value in choices:
-            if isinstance(value, (list, tuple)):
-                for key, _ in value:
-                    yield key
-            else:
-                yield key
 
     def wrapper(field, **kwargs):
         if field.choices:
-            return random.choice(list(_valid_choices(field.choices)))
+            from django_any.functions import valid_choices 
+            return random.choice(list(valid_choices(field.choices)))
         return function(field, **kwargs)
 
     return wrapper

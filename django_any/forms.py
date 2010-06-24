@@ -346,15 +346,30 @@ def choice_field_data(field, **kwargs):
     >>> typed_result in ['YNG', 'OLD']
     True
     """
-    def _valid_choices(choices):
-        for key, value in choices:
-            if isinstance(value, (list, tuple)):
-                for key, _ in value:
-                    yield key
-            else:
-                yield key
-
     if field.choices:
-        return str(random.choice(list(_valid_choices(field.choices))))
+        from django_any.functions import valid_choices 
+        return str(random.choice(list(valid_choices(field.choices))))
+    return 'None'
+
+
+@any_form_field.register(forms.MultipleChoiceField)
+def multiple_choice_field_data(field, **kwargs):
+    """
+    Return random value for MultipleChoiceField
+
+    >>> CHOICES = [('YNG', 'Child'), ('MIDDLE', 'Parent') ,('OLD', 'GrandParent')]
+    >>> result = any_form_field(forms.MultipleChoiceField(choices=CHOICES))
+    >>> type(result)
+    <type 'str'>
+    """
+    if field.choices:
+        from django_any.functions import valid_choices 
+        l = list(valid_choices(field.choices))
+        random.shuffle(l)
+        choices = []
+        count = xunit.any_int(min_value=1, max_value=len(field.choices))
+        for i in xrange(0, count):
+            choices.append(l[i])
+        return ' '.join(choices)
     return 'None'
     
