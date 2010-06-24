@@ -54,6 +54,19 @@ class FormFieldDataFactory(object):
 any_form_field = FormFieldDataFactory()
 
 
+def any_form(form_cls, **kwargs):
+    """
+    Returns tuple of form data and files
+    """
+    form_data = {}
+    form_files = {}
+
+    for name, field in form_cls.base_fields.iteritems():
+        form_data[name] = any_form_field(field)
+
+    return form_data, form_files
+
+
 @any_form_field.decorator
 def field_required_attribute(function):
     """
