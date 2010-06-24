@@ -328,3 +328,29 @@ def time_field_data(field, **kwargs):
     else:
         time = time.strftime('%H:%M:%S')
     return time
+
+
+@any_form_field.register(forms.ChoiceField)
+def choice_field_data(field, **kwargs):
+    """
+    Return random value for ChoiceField
+
+    >>> CHOICES = [('YNG', 'Child'), ('OLD', 'Parent')]
+    >>> result = any_form_field(forms.ChoiceField(choices=CHOICES))
+    >>> type(result)
+    <type 'str'>
+    >>> result in ['YNG', 'OLD']
+    True
+    """
+    def _valid_choices(choices):
+        for key, value in choices:
+            if isinstance(value, (list, tuple)):
+                for key, _ in value:
+                    yield key
+            else:
+                yield key
+
+    if field.choices:
+        return str(random.choice(list(_valid_choices(field.choices))))
+    return 'None'
+    
