@@ -228,3 +228,52 @@ def ipaddress_field_data(field, **kwargs):
     """
     nums = [str(xunit.any_int(min_value=0, max_value=255)) for _ in xrange(0, 4)]
     return ".".join(nums)
+
+@any_form_field.register(forms.NullBooleanField)
+def nullboolean_field_data(field, **kwargs):
+    """
+    Return random value for NullBooleanField
+    
+    >>> result = any_form_field(forms.NullBooleanField())
+    >>> result in [None, True, False]
+    True
+    """
+    return random.choice([None, True, False])
+
+@any_form_field.register(forms.SlugField)
+def slug_field_data(field, **kwargs):
+    """
+    Return random value for SlugField
+    
+    >>> result = any_form_field(forms.SlugField())
+    >>> type(result)
+    <type 'str'>
+    >>> from django.core.validators import slug_re
+    >>> import re
+    >>> re.match(slug_re, result) is not None
+    True
+    """
+    from string import ascii_letters, digits
+    letters = ascii_letters + digits + '_-' 
+    return xunit.any_string(letters = letters, max_length = 20)
+
+@any_form_field.register(forms.URLField)
+def url_field_data(field, **kwargs):
+    """
+    Return random value for URLField
+    >>> result = any_form_field(forms.URLField())
+    >>> from django.core.validators import URLValidator
+    >>> import re
+    >>> re.match(URLValidator.regex, result) is not None
+    True
+    """
+    url = ['http://news.yandex.ru/society.html',
+           'http://video.google.com/?hl=en&tab=wv',
+           'http://www.microsoft.com/en/us/default.aspx',
+           'http://habrahabr.ru/company/opera/',
+           'http://www.apple.com/support/hardware/',
+           'http://localhost/',
+           'http://72.14.221.99',
+           'http://fr.wikipedia.org/wiki/France']
+    from random import choice
+    return choice(url)

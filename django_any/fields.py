@@ -203,7 +203,7 @@ def any_field(field, **kwargs):
 @multimethod(models.NullBooleanField)
 def any_field(field, **kwargs):
     """
-    Return random value for IPAddressField
+    Return random value for NullBooleanField
     >>> result = any_field(models.NullBooleanField())
     >>> result in [None, True, False]
     True
