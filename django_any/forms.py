@@ -177,6 +177,23 @@ def date_field_data(field, **kwargs):
     return date
 
 
+@any_form_field.register(forms.DateTimeField)
+def datetime_field_data(field, **kwargs):
+    """
+    Return random value for DateTimeField
+
+    >>> result = any_form_field(forms.DateTimeField())
+    >>> type(result)
+    <type 'str'>
+    """
+    datetime = xunit.any_datetime()
+    if field.input_formats:
+        datetime = datetime.strftime(field.input_formats)
+    else:
+        datetime = datetime.strftime('%Y-%m-%d %H:%M:%S')
+    return datetime
+
+
 @any_form_field.register(forms.FloatField)
 def float_field_data(field, **kwargs):
     """
@@ -225,6 +242,7 @@ def integer_field_data(field, **kwargs):
 def ipaddress_field_data(field, **kwargs):
     """
     Return random value for IPAddressField
+    
     >>> result = any_form_field(forms.IPAddressField())
     >>> type(result)
     <type 'str'>
@@ -273,6 +291,7 @@ def slug_field_data(field, **kwargs):
 def url_field_data(field, **kwargs):
     """
     Return random value for URLField
+    
     >>> result = any_form_field(forms.URLField())
     >>> from django.core.validators import URLValidator
     >>> import re
@@ -289,3 +308,23 @@ def url_field_data(field, **kwargs):
            'http://fr.wikipedia.org/wiki/France']
     from random import choice
     return choice(url)
+
+
+@any_form_field.register(forms.TimeField)
+def time_field_data(field, **kwargs):
+    """
+    Return random value for TimeField
+
+    >>> result = any_form_field(forms.TimeField())
+    >>> type(result)
+    <type 'str'>
+    """
+    import datetime
+    time = datetime.time(xunit.any_int(min_value=0, max_value=23),
+                         xunit.any_int(min_value=0, max_value=59),
+                         xunit.any_int(min_value=0, max_value=59))
+    if field.input_formats:
+        time = time.strftime(field.input_formats)
+    else:
+        time = time.strftime('%H:%M:%S')
+    return time
