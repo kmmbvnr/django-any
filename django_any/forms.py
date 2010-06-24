@@ -73,7 +73,7 @@ def field_required_attribute(function):
     Sometimes return None if field is not required
 
     >>> result = any_form_field(forms.BooleanField(required=False))
-    >>> result in [None, True, False]
+    >>> result in ['', 'True', 'False']
     True
     """
     def _wrapper(field, **kwargs):
@@ -90,9 +90,9 @@ def boolean_field_data(field, **kwargs):
 
     >>> result = any_form_field(forms.BooleanField())
     >>> type(result)
-    <type 'bool'>
+    <type 'str'>
     """
-    return xunit.any_boolean()
+    return str(xunit.any_boolean())
 
 
 @any_form_field.register(forms.CharField)
@@ -106,6 +106,7 @@ def char_field_data(field, **kwargs):
     return xunit.any_string(min_length=field.min_length or 1, 
                             max_length=field.max_length or 255)
 
+
 @any_form_field.register(forms.DecimalField)
 def decimal_field_data(field, **kwargs):
     """
@@ -113,9 +114,9 @@ def decimal_field_data(field, **kwargs):
 
     >>> result = any_form_field(forms.DecimalField(max_value=100, min_value=11, max_digits=4, decimal_places = 2))
     >>> type(result)
-    <class 'decimal.Decimal'>
+    <type 'str'>
     >>> from decimal import Decimal
-    >>> result >= 11, result <= Decimal('99.99')
+    >>> Decimal(result) >= 11, Decimal(result) <= Decimal('99.99')
     (True, True)
     """
     min_value = 0
@@ -131,9 +132,10 @@ def decimal_field_data(field, **kwargs):
         max_value = min(max_value,
                         Decimal('%s.%s' % ('9'*(field.max_digits-field.decimal_places),
                                            '9'*field.decimal_places)))
-    return xunit.any_decimal(min_value=min_value,
+    return str(xunit.any_decimal(min_value=min_value,
                              max_value=max_value,
-                             decimal_places = field.decimal_places or 2)
+                             decimal_places = field.decimal_places or 2))
+
 
 @any_form_field.register(forms.EmailField)
 def email_field_data(field, **kwargs):
@@ -157,20 +159,23 @@ def email_field_data(field, **kwargs):
         xunit.any_string(min_length=min_length, max_length=max_length),
         xunit.any_string(min_length=2, max_length=3))
 
-"""@any_form_field.register(forms.DateField)
+
+@any_form_field.register(forms.DateField)
 def date_field_data(field, **kwargs):
-    """"""
+    """
     Return random value for DateField
 
-    >>> result = any_form_field(forms.DateField(input_formats='%d %B %Y'))
+    >>> result = any_form_field(forms.DateField())
     >>> type(result)
-    <type 'datetime.date'>
-    """"""
+    <type 'str'>
+    """
     date = xunit.any_date()
     if field.input_formats:
         date = date.strftime(field.input_formats)
+    else:
+        date = date.strftime('%Y-%m-%d')
     return date
-"""
+
 
 @any_form_field.register(forms.FloatField)
 def float_field_data(field, **kwargs):
@@ -179,8 +184,8 @@ def float_field_data(field, **kwargs):
 
     >>> result = any_form_field(forms.FloatField(max_value=200, min_value=100))
     >>> type(result)
-    <type 'float'>
-    >>> result >=100, result <=200
+    <type 'str'>
+    >>> float(result) >=100, float(result) <=200
     (True, True)
     """
     min_value = 0
@@ -191,7 +196,8 @@ def float_field_data(field, **kwargs):
             min_value = elem.limit_value
         if isinstance(elem, MaxValueValidator):
             max_value = elem.limit_value
-    return xunit.any_float(min_value=min_value, max_value=max_value, precision=3)
+    return str(xunit.any_float(min_value=min_value, max_value=max_value, precision=3))
+
 
 @any_form_field.register(forms.IntegerField)
 def integer_field_data(field, **kwargs):
@@ -200,8 +206,8 @@ def integer_field_data(field, **kwargs):
 
     >>> result = any_form_field(forms.IntegerField(max_value=200, min_value=100))
     >>> type(result)
-    <type 'int'>
-    >>> result >=100, result <=200
+    <type 'str'>
+    >>> int(result) >=100, int(result) <=200
     (True, True)
     """
     min_value = 0
@@ -212,7 +218,8 @@ def integer_field_data(field, **kwargs):
             min_value = elem.limit_value
         if isinstance(elem, MaxValueValidator):
             max_value = elem.limit_value
-    return xunit.any_int(min_value=min_value, max_value=max_value)
+    return str(xunit.any_int(min_value=min_value, max_value=max_value))
+
 
 @any_form_field.register(forms.IPAddressField)
 def ipaddress_field_data(field, **kwargs):
@@ -229,16 +236,20 @@ def ipaddress_field_data(field, **kwargs):
     nums = [str(xunit.any_int(min_value=0, max_value=255)) for _ in xrange(0, 4)]
     return ".".join(nums)
 
+
 @any_form_field.register(forms.NullBooleanField)
-def nullboolean_field_data(field, **kwargs):
+def null_boolean_field_data(field, **kwargs):
     """
     Return random value for NullBooleanField
     
     >>> result = any_form_field(forms.NullBooleanField())
-    >>> result in [None, True, False]
+    >>> type(result)
+    <type 'str'>
+    >>> result in ['None', 'True', 'False']
     True
     """
-    return random.choice([None, True, False])
+    return random.choice(['None', 'True', 'False'])
+
 
 @any_form_field.register(forms.SlugField)
 def slug_field_data(field, **kwargs):
@@ -256,6 +267,7 @@ def slug_field_data(field, **kwargs):
     from string import ascii_letters, digits
     letters = ascii_letters + digits + '_-' 
     return xunit.any_string(letters = letters, max_length = 20)
+
 
 @any_form_field.register(forms.URLField)
 def url_field_data(field, **kwargs):
