@@ -372,4 +372,4 @@ def multiple_choice_field_data(field, **kwargs):
             choices.append(l[i])
         return ' '.join(choices)
     return 'None'
-    
+
