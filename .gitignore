@@ -1,6 +1,8 @@
 *.pyc
 .coverage
 .ve
+.cache
+reports
 coverage.xml
 nosetests.xml
 pylint.out
