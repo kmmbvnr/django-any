@@ -27,5 +27,5 @@ else
 fi
 
 cd $ROOT_DIR
-export PYTHONPATH=$ROOT_DIR
+export PYTHONPATH=$ROOT_DIR:$PYTHONPATH
 python tests/test_runner.py $*
