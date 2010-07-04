@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
 from django.db import models
-from django_any.fields import any_field
+from django_any import any_field
 
 class TestChoiceSelection(TestCase):
     """

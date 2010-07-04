@@ -11,7 +11,7 @@ def suite():
      suite.addTest(defaultTestLoader.loadTestsFromModule(any_forms_tests))
      suite.addTest(defaultTestLoader.loadTestsFromModule(any_user_tests))
      suite.addTest(doctest.DocTestSuite('django_any.xunit'))
-     suite.addTest(doctest.DocTestSuite('django_any.fields'))
+     suite.addTest(doctest.DocTestSuite('django_any.models'))
      suite.addTest(doctest.DocTestSuite('django_any.forms'))
 
      return suite
