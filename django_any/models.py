@@ -9,8 +9,11 @@ from django_any.multimethod import multimethod
 
 @multimethod(models.ForeignKey)
 def any_field(field, **kwargs):
-    if field.null and any_boolean():
-        return None
+    return any_model(field.rel.to, **kwargs)
+
+
+@multimethod(models.OneToOneField)
+def any_field(field, **kwargs):
     return any_model(field.rel.to, **kwargs)
 
 

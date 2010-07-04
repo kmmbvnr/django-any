@@ -19,6 +19,14 @@ class ModelWithForeignKey(models.Model):
         app_label='django_any'
 
 
+class ModelWithOneToOneField(models.Model):
+    name = models.CharField(max_length=5)
+    simple = models.OneToOneField(SimpleModel)
+
+    class Meta:
+        app_label='django_any'
+
+
 class ModelWithOneChoice(models.Model):
     CHOICES = [('N', 'No')]
     choice = models.CharField(max_length=1, choices=CHOICES, unique=True)
@@ -61,10 +69,12 @@ class TestAnyModel(TestCase):
         assert result.name is not None
         assert result.simple.name is not None
 
-    def test_user_creation(self):
-        #TODO move to integration tests
-        from django.contrib.auth.models import User
-        result = any_model(User)
+    def test_onetoonefield_creation(self):
+        result = any_model(ModelWithOneToOneField)
+        assert type(result) == ModelWithOneToOneField
+        assert type(result.simple) == SimpleModel
+        assert result.name is not None
+        assert result.simple.name is not None
 
     def test_set_nested_fields(self):
         result = any_model(ModelWithForeignKey, simple__name='Name')

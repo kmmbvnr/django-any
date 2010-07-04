@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.contrib.auth.models import User
 from django.test import TestCase
+from django_any.models import any_model
 from django_any.contrib.auth import any_user
 
 
@@ -12,6 +14,11 @@ class TestPermission(models.Model):
 
 
 class TestCreateUser(TestCase):
+    def test_raw_user_creation(self):
+        result = any_model(User)
+        assert type(result) == User
+
+
     def test_create_superuser(self):
         user = any_user(is_superuser=True)
         self.assertTrue(user.is_superuser)
