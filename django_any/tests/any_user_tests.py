@@ -2,7 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.test import TestCase
-from django_any.models import any_model
+from django_any import any_model
 from django_any.contrib.auth import any_user
 
 

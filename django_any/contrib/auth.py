@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Permission, Group
-from django_any.models import any_model
+from django_any import any_model
 
 def any_user(permissions=[], groups=[], **kwargs):
     """

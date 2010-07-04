@@ -3,14 +3,19 @@
 """
 Values generators for common Django Fields
 """
-
 import random
 from decimal import Decimal
-from django.db import models
-from django_any import xunit
-from django_any.multimethod import multimethod, multimethod_decorator
 
-@multimethod_decorator('any_field')
+from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, IntegrityError
+
+from django_any import xunit
+from django_any.functions import valid_choices, split_model_kwargs, ExtensionMethod
+
+any_field = ExtensionMethod()
+
+@any_field.decorator
 def any_field_blank(function):
     """
     Sometimes return None if field could be blank
@@ -22,7 +27,7 @@ def any_field_blank(function):
     return wrapper
 
 
-@multimethod_decorator('any_field')
+@any_field.decorator
 def any_field_choices(function):
     """
     Selection from field.choices
@@ -32,18 +37,16 @@ def any_field_choices(function):
     >>> result in ['YNG', 'OLD']
     True
     """
-
     def wrapper(field, **kwargs):
         if field.choices:
-            from django_any.functions import valid_choices 
             return random.choice(list(valid_choices(field.choices)))
         return function(field, **kwargs)
 
     return wrapper
 
 
-@multimethod(models.BigIntegerField)
-def any_field(field, **kwargs):
+@any_field.register(models.BigIntegerField)
+def any_biginteger_field(field, **kwargs):
     """
     Return random value for BigIntegerField
 
@@ -54,8 +57,8 @@ def any_field(field, **kwargs):
     return long(xunit.any_int(min_value=1, max_value=10**20))
 
 
-@multimethod(models.BooleanField)
-def any_field(field, **kwargs):
+@any_field.register(models.BooleanField)
+def any_boolean_field(field, **kwargs):
     """
     Return random value for BooleanField
 
@@ -66,8 +69,8 @@ def any_field(field, **kwargs):
     return xunit.any_boolean()
 
 
-@multimethod(models.PositiveIntegerField)
-def any_field(field, **kwargs):
+@any_field.register(models.PositiveIntegerField)
+def any_positiveinteger_field(field, **kwargs):
     """
     An positive integer
 
@@ -80,8 +83,8 @@ def any_field(field, **kwargs):
     return xunit.any_int(min_value=1, max_value=9999)
 
 
-@multimethod(models.CharField)
-def any_field(field, **kwargs):
+@any_field.register(models.CharField)
+def any_char_field(field, **kwargs):
     """
     Return random value for CharField
 
@@ -92,11 +95,11 @@ def any_field(field, **kwargs):
     return xunit.any_string(min_length=1, max_length=field.max_length)
 
 
-@multimethod(models.CommaSeparatedIntegerField)
-def any_field(field, **kwargs):
+@any_field.register(models.CommaSeparatedIntegerField)
+def any_commaseparatedinteger_field(field, **kwargs):
     """
     Return random value for CharField
-    
+
     >>> result = any_field(models.CommaSeparatedIntegerField(max_length=10))
     >>> type(result)
     <type 'str'>
@@ -108,10 +111,10 @@ def any_field(field, **kwargs):
     return ",".join(nums)
 
 
-@multimethod(models.DateField)
-def any_field(field, **kwargs):
+@any_field.register(models.DateField)
+def any_date_field(field, **kwargs):
     """
-    Return random value for DateField, 
+    Return random value for DateField,
     skips auto_now and auto_now_add fields
 
     >>> result = any_field(models.DateField())
@@ -123,10 +126,10 @@ def any_field(field, **kwargs):
     return xunit.any_date()
 
 
-@multimethod(models.DateTimeField)
-def any_field(field, **kwargs):
+@any_field.register(models.DateTimeField)
+def any_datetime_field(field, **kwargs):
     """
-    Return random value for DateTimeField, 
+    Return random value for DateTimeField,
     skips auto_now and auto_now_add fields
 
     >>> result = any_field(models.DateTimeField())
@@ -136,8 +139,8 @@ def any_field(field, **kwargs):
     return xunit.any_datetime()
 
 
-@multimethod(models.DecimalField)
-def any_field(field, **kwargs):
+@any_field.register(models.DecimalField)
+def any_decimal_field(field, **kwargs):
     """
     Return random value for DecimalField
 
@@ -152,8 +155,8 @@ def any_field(field, **kwargs):
                              decimal_places = field.decimal_places)
 
 
-@multimethod(models.EmailField)
-def any_field(field, **kwargs):
+@any_field.register(models.EmailField)
+def any_email_field(field, **kwargs):
     """
     Return random value for EmailField
 
@@ -167,9 +170,10 @@ def any_field(field, **kwargs):
     return "%s@%s.%s" % (xunit.any_string(max_length=10),
                          xunit.any_string(max_length=10),
                          xunit.any_string(min_length=2, max_length=3))
- 
-@multimethod(models.FloatField)
-def any_field(field, **kwargs):
+
+
+@any_field.register(models.FloatField)
+def any_float_field(field, **kwargs):
     """
     Return random value for FloatField
 
@@ -179,8 +183,9 @@ def any_field(field, **kwargs):
     """
     return xunit.any_float(min_value=1, max_value=100, precision=3)
 
-@multimethod(models.IPAddressField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.IPAddressField)
+def any_ipaddress_field(field, **kwargs):
     """
     Return random value for IPAddressField
     >>> result = any_field(models.IPAddressField())
@@ -194,8 +199,9 @@ def any_field(field, **kwargs):
     nums = [str(xunit.any_int(min_value=0, max_value=255)) for _ in xrange(0, 4)]
     return ".".join(nums)
 
-@multimethod(models.NullBooleanField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.NullBooleanField)
+def any_nullboolean_field(field, **kwargs):
     """
     Return random value for NullBooleanField
     >>> result = any_field(models.NullBooleanField())
@@ -204,8 +210,9 @@ def any_field(field, **kwargs):
     """
     return random.choice([None, True, False])
 
-@multimethod(models.PositiveSmallIntegerField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.PositiveSmallIntegerField)
+def any_positivesmallinteger_field(field, **kwargs):
     """
     Return random value for PositiveSmallIntegerField
     >>> result = any_field(models.PositiveSmallIntegerField())
@@ -216,8 +223,9 @@ def any_field(field, **kwargs):
     """
     return xunit.any_int(min_value=1, max_value=255)
 
-@multimethod(models.SlugField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.SlugField)
+def any_slug_field(field, **kwargs):
     """
     Return random value for SlugField
     >>> result = any_field(models.SlugField())
@@ -229,11 +237,12 @@ def any_field(field, **kwargs):
     True
     """
     from string import ascii_letters, digits
-    letters = ascii_letters + digits + '_-' 
+    letters = ascii_letters + digits + '_-'
     return xunit.any_string(letters = letters, max_length = field.max_length)
 
-@multimethod(models.SmallIntegerField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.SmallIntegerField)
+def any_smallinteger_field(field, **kwargs):
     """
     Return random value for SmallIntegerValue
     >>> result = any_field(models.SmallIntegerField())
@@ -244,8 +253,9 @@ def any_field(field, **kwargs):
     """
     return xunit.any_int(min_value=-255, max_value=255)
 
-@multimethod(models.IntegerField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.IntegerField)
+def any_integer_field(field, **kwargs):
     """
     Return random value for IntegerField
     >>> result = any_field(models.IntegerField())
@@ -254,8 +264,9 @@ def any_field(field, **kwargs):
     """
     return xunit.any_int(min_value=-10000, max_value=10000)
 
-@multimethod(models.TextField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.TextField)
+def any_text_field(field, **kwargs):
     """
     Return random 'lorem ipsum' Latin text
     >>> result = any_field(models.TextField())
@@ -266,8 +277,9 @@ def any_field(field, **kwargs):
     from django.contrib.webdesign.lorem_ipsum import paragraphs
     return paragraphs(10)
 
-@multimethod(models.URLField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.URLField)
+def any_url_field(field, **kwargs):
     """
     Return random value for URLField
     >>> result = any_field(models.URLField())
@@ -287,18 +299,54 @@ def any_field(field, **kwargs):
     from random import choice
     return choice(url)
 
-@multimethod(models.TimeField)
-def any_field(field, **kwargs):
+
+@any_field.register(models.TimeField)
+def any_time_field(field, **kwargs):
     """
     Return random value for TimeField
     >>> result = any_field(models.TimeField())
     >>> type(result)
     <type 'datetime.time'>
-    
+
     """
     import datetime
     return datetime.time(
         xunit.any_int(min_value=0, max_value=23),
-        xunit.any_int(min_value=0, max_value=59), 
+        xunit.any_int(min_value=0, max_value=59),
         xunit.any_int(min_value=0, max_value=59))
+
+
+@any_field.register(models.ForeignKey)
+def any_foreignkey_field(field, **kwargs):
+    return any_model(field.rel.to, **kwargs)
+
+
+@any_field.register(models.OneToOneField)
+def any_onetoone_field(field, **kwargs):
+    return any_model(field.rel.to, **kwargs)
+
+
+def _fill_model_fields(model, **kwargs):
+    model_fields, fields_args = split_model_kwargs(kwargs)
+    for field in model._meta.fields:
+        if field.name in model_fields:
+            setattr(model, field.name, kwargs[field.name])
+        elif not isinstance(field, models.fields.AutoField):
+            setattr(model, field.name, any_field(field, **fields_args[field.name]))
+
+
+def any_model(model_cls, **kwargs):
+    result = model_cls()
+
+    attempts = 10
+    while True:
+        try:
+            _fill_model_fields(result, **kwargs)
+            result.full_clean()
+            result.save()
+            return result
+        except (IntegrityError, ValidationError):
+            attempts -=1
+            if not attempts:
+                raise
 

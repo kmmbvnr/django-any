@@ -2,7 +2,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
 from django.test import TestCase
-from django_any.models import any_model
+from django_any import any_model
 
 class SimpleModel(models.Model):
     name = models.CharField(max_length=5)
