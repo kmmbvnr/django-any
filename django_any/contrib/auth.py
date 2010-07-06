@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Permission, Group
 from django_any import any_model
 
-def any_user(permissions=[], groups=[], **kwargs):
+def any_user(password=None, permissions=[], groups=[], **kwargs):
     """
     Shortcut for creating Users
 
@@ -31,5 +31,9 @@ def any_user(permissions=[], groups=[], **kwargs):
             codename=codename)
         user.user_permissions.add(permission)
 
+    if password:
+        user.set_password(password)
+    
+    user.save()
     return user
 
