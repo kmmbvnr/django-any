@@ -11,7 +11,8 @@ from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
 
 from django_any import xunit
-from django_any.functions import valid_choices, split_model_kwargs, ExtensionMethod
+from django_any.functions import valid_choices, split_model_kwargs, \
+    ExtensionMethod
 
 any_field = ExtensionMethod()
 
