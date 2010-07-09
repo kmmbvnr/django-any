@@ -7,9 +7,11 @@ Django forms data generators
 import random
 from django import forms
 from django_any import xunit
-from django_any.functions import ExtensionMethod
+from django_any.functions import valid_choices, split_model_kwargs, \
+    ExtensionMethod
 
 any_form_field = ExtensionMethod()
+
 
 def any_form(form_cls, **kwargs):
     """
@@ -18,8 +20,13 @@ def any_form(form_cls, **kwargs):
     form_data = {}
     form_files = {}
 
+    form_fields, fields_args = split_model_kwargs(kwargs)
+
     for name, field in form_cls.base_fields.iteritems():
-        form_data[name] = any_form_field(field)
+        if name in form_fields:
+            form_data[name] = kwargs[name]
+        else:
+            form_data[name] = any_form_field(field)
 
     return form_data, form_files
 
@@ -304,7 +311,6 @@ def choice_field_data(field, **kwargs):
     True
     """
     if field.choices:
-        from django_any.functions import valid_choices 
         return str(random.choice(list(valid_choices(field.choices))))
     return 'None'
 
