@@ -40,7 +40,11 @@ class Client(DjangoClient):
         #TODO support string and list of strings as forms names in context
         for form in context_forms(request.context):
             form_data, form_files = any_form(form.__class__) #TODO support form instance
-            post_data.update(form_data) #TODO support form prefix
+
+            if form.prefix:
+                form_data = dict([('%s-%s' % (form.prefix, key), value) for key, value in form_data.items()])
+
+            post_data.update(form_data)
 
         if extra:
             post_data.update(extra)
