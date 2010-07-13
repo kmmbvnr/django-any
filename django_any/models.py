@@ -332,7 +332,15 @@ def _fill_model_fields(model, **kwargs):
     for field in model._meta.fields:
         if field.name in model_fields:
             setattr(model, field.name, kwargs[field.name])
-        elif not isinstance(field, models.fields.AutoField):
+        elif isinstance(field, models.OneToOneField) and field.rel.parent_link:
+            """
+            skip link to parent instance
+            """
+        elif isinstance(field, models.fields.AutoField):
+            """
+            skip primary key field
+            """
+        else:
             setattr(model, field.name, any_field(field, **fields_args[field.name]))
 
 
