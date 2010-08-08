@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
+from django.db.models import Q
 
 from django_any import xunit
 from django_any.functions import valid_choices, split_model_kwargs, \
@@ -331,7 +332,15 @@ def _fill_model_fields(model, **kwargs):
     model_fields, fields_args = split_model_kwargs(kwargs)
     for field in model._meta.fields:
         if field.name in model_fields:
-            setattr(model, field.name, kwargs[field.name])
+            if isinstance(kwargs[field.name], Q):
+                """
+                Lookup ForeingKey field in db
+                """
+                key_field = model._meta.get_field(field.name)
+                value = key_field.rel.to.objects.get(kwargs[field.name])
+                setattr(model, field.name, value)
+            else:
+                setattr(model, field.name, kwargs[field.name])
         elif isinstance(field, models.OneToOneField) and field.rel.parent_link:
             """
             skip link to parent instance

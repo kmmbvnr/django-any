@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
+from django.db.models import Q
 from django.test import TestCase
 from django_any import any_model
 
@@ -80,6 +81,13 @@ class TestAnyModel(TestCase):
         result = any_model(ModelWithForeignKey, simple__name='Name')
         self.assertEqual('Name', result.simple.name)
 
+
+class TestQObjectsSupport(TestCase):
+    def test_simple_lookup_succeed(self):
+        simple = any_model(SimpleModel)
+        result = any_model(ModelWithForeignKey, simple=Q(pk=simple.pk))
+        self.assertEqual(simple, result.simple)
+        
 
 class TestUniqueConstrainViolations(TestCase):
     def test_fail_if_no_choices(self):
