@@ -8,7 +8,7 @@ setup(
     author_email='kmmbvnr@gmail.com',
     url='http://github.com/kmmbvnr/django-any',
     keywords = "django",
-    packages=['django_any', 'django_any.contrib', 'django_any.test'],
+    packages=['django_any', 'django_any.contrib', 'django_any.tests'],
     include_package_data=True,
     zip_safe=False,
     license='MIT License',
@@ -23,3 +23,4 @@ setup(
         'Framework :: Django',
     ]
 )
+
