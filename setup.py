@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='django-fsm',
+    name='django-any',
     version='0.0.1',
     description='Unobtrusive test models  creation for django.',
     author='Mikhail Podgurskiy',
