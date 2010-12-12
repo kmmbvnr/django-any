@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time, random
 from django import forms
 from django_any import any_form
 from django.test.client import Client as DjangoClient
@@ -50,3 +51,53 @@ class Client(DjangoClient):
             post_data.update(extra)
 
         return self.post(url, post_data)
+
+
+def without_random_seed(func):
+    """
+    Marks that test method do not need to be started with random seed
+    """
+    func.__django_any_without_random_seed = True
+    return func
+
+
+def with_seed(seed):
+    """
+    Marks that test method do not need to be started with specific seed
+    """
+    def _wrapper(func):
+        seeds = getattr(func, '__django_any_with_seed', [])
+        seeds.append(seed)
+        func.__django_any_with_seed = seeds
+        return func
+    return _wrapper
+
+
+def set_seed(func, seed=None):
+    """
+    Set randon seed before executing function. If seed is 
+    not provided current timestamp used
+    """
+    def _wrapper(self, seed=seed, *args, **kwargs):
+        if not seed:
+            seed = int(time.time()*1000)
+        random.seed(seed)
+        return func(self, *args, **kwargs)
+    return _wrapper
+
+
+class WithTestDataSeed(type):
+    def __new__(cls, name, bases, attrs):
+        for name, func in attrs.items():
+            if name.startswith('test') and hasattr(func, '__call__'):
+                if getattr(func, '__django_any_without_random_seed', False):
+                    del attrs[name]
+                else:
+                    attrs[name] = set_seed(func)
+
+                for seed in getattr(func, '__django_any_with_seed', []):
+                    attrs['%s_%d' % (name, seed)] = set_seed(func, seed)
+        
+        testcase = super(WithTestDataSeed, cls).__new__(cls, name, bases, attrs)
+        return testcase
+
