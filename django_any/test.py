@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time, random
+from unittest import TestCase, _strclass
 from django import forms
 from django_any import any_form
 from django.test.client import Client as DjangoClient
@@ -79,15 +80,22 @@ def set_seed(func, seed=None):
     not provided current timestamp used
     """
     def _wrapper(self, seed=seed, *args, **kwargs):
-        if not seed:
-            seed = int(time.time()*1000)
-        random.seed(seed)
+        self.__django_any_seed = seed if seed else int(time.time()*1000)
+        random.seed(self.__django_any_seed)
         return func(self, *args, **kwargs)
     return _wrapper
 
 
 class WithTestDataSeed(type):
-    def __new__(cls, name, bases, attrs):
+    """
+    Metaclass for TestCases, manages random tests run
+    """
+    def __new__(cls, cls_name, bases, attrs):
+        attrs['__django_any_seed'] = 0
+
+        def shortDescription(self):            
+            return "%s (%s) With seed %s" % (self._testMethodName,  _strclass(self.__class__), getattr(self, '__django_any_seed'))
+
         for name, func in attrs.items():
             if name.startswith('test') and hasattr(func, '__call__'):
                 if getattr(func, '__django_any_without_random_seed', False):
@@ -97,7 +105,8 @@ class WithTestDataSeed(type):
 
                 for seed in getattr(func, '__django_any_with_seed', []):
                     attrs['%s_%d' % (name, seed)] = set_seed(func, seed)
-        
-        testcase = super(WithTestDataSeed, cls).__new__(cls, name, bases, attrs)
+                
+        testcase = super(WithTestDataSeed, cls).__new__(cls, cls_name, bases, attrs)
+        testcase.shortDescription = shortDescription
         return testcase
-
+    
