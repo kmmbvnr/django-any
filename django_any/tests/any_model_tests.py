@@ -108,7 +108,7 @@ class TestValidationPassed(TestCase):
 
 
 class ModelWithFileField(models.Model):
-    content = models.FielField(upload_to='.')
+    content = models.FileField(upload_to='.')
 
     class Meta:
         app_label = 'django_any'
