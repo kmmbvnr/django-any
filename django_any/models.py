@@ -3,12 +3,13 @@
 """
 Values generators for common Django Fields
 """
-import random
+import os, random
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
 from django.db.models import Q
+from django.db.models.fields.files import FieldFile
 
 from django_any import xunit
 from django_any.functions import valid_choices, split_model_kwargs, \
@@ -189,15 +190,15 @@ def any_float_field(field, **kwargs):
 def any_file_field(field, **kwargs):
     """
     Lookup for nearest existing file
-    >>> result = any_field(models.FileField(upload_to='.'))
-    >>> result is None
-    False
+
     """
     def get_some_file(path):
         subdirs, files = field.storage.listdir(path)
+
         if files:
             result_file = random.choice(files)
-            return field.storage.open("%s/%s" % (path, result_file))
+            instance = field.storage.open("%s/%s" % (path, result_file)).file
+            return FieldFile(instance, field, result_file)
 
         for subdir in subdirs:
             result = get_some_file("%s/%s" % (path, subdir))
@@ -206,8 +207,39 @@ def any_file_field(field, **kwargs):
             
     result = get_some_file(field.upload_to)
 
-    if result is None and not field.none:
+    if result is None and not field.null:
         raise TypeError("Can't found file in %s for non nullable FileField" % field.upload_to)
+    return result
+
+
+@any_field.register(models.FilePathField)
+def any_filepath_field(field, **kwargs):
+    """
+    Lookup for nearest existing file
+
+    """
+    def get_some_file(path):
+        subdirs, files = [], []
+        for entry in os.listdir(path):
+            entry_path = os.path.join(path, entry)
+            if os.path.isdir(entry_path):
+                subdirs.append(entry_path)
+            else:
+                if not field.match or re.match(field.match,entry):
+                    files.append(entry_path)
+
+        if files:
+            return random.choice(files)
+        
+        if field.recursive:
+            for subdir in subdirs:
+                result = get_some_file(subdir)
+                if result:
+                    return result
+
+    result = get_some_file(field.path)
+    if result is None and not field.null:
+        raise TypeError("Can't found file in %s for non nullable FilePathField" % field.path)
     return result
 
 
