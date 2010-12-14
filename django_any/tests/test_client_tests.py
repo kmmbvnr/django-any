@@ -19,7 +19,7 @@ def view(request):
     if request.POST:
         form = TestForm(request.POST)
         if form.is_valid():
-            return redirect('/view/');
+            return redirect('/view/')
     else:
         form = TestForm()
 

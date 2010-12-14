@@ -10,13 +10,13 @@ class TestPermission(models.Model):
     name = models.CharField(max_length=5)
 
     class Meta:
-        app_label='django_any'
+        app_label = 'django_any'
 
 
 class TestCreateUser(TestCase):
     def test_raw_user_creation(self):
         result = any_model(User)
-        assert type(result) == User
+        self.assertEqual(type(result), User)
 
 
     def test_create_superuser(self):
@@ -30,4 +30,6 @@ class TestCreateUser(TestCase):
         self.assertTrue(user.has_perm('django_any.add_testpermission'))
         self.assertTrue(user.has_perm('django_any.delete_testpermission'))
         self.assertFalse(user.has_perm('django_any.change_testpermission'))
+
+
 

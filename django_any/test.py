@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time, random
-from unittest import TestCase, _strclass
+from unittest import _strclass
 from django import forms
 from django_any import any_form
 from django.test.client import Client as DjangoClient

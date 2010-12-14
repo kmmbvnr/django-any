@@ -101,7 +101,7 @@ def any_string(letters = ascii_letters, min_length=3, max_length=100):
     return "".join(letters)
 
 
-def any_date(from_date=date(1990,1,1), to_date=date.today()):
+def any_date(from_date=date(1990, 1, 1), to_date=date.today()):
     """
     Return random date from the [from_date, to_date] interval
 
@@ -116,7 +116,7 @@ def any_date(from_date=date(1990,1,1), to_date=date.today()):
     return from_date + timedelta(days=days)
 
 
-def any_datetime(from_date=datetime(1990,1,1), to_date=datetime.now()):
+def any_datetime(from_date=datetime(1990, 1, 1), to_date=datetime.now()):
     """
     Return random datetime from the [from_date, to_date] interval
 

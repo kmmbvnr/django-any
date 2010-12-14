@@ -6,7 +6,6 @@ Values generators for common Django Fields
 import random
 from decimal import Decimal
 
-from django.db import models
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
 from django.db.models import Q
@@ -390,7 +389,7 @@ def any_model(model_cls, **kwargs):
             result.save()
             return result
         except (IntegrityError, ValidationError):
-            attempts -=1
+            attempts -= 1
             if not attempts:
                 raise
 
