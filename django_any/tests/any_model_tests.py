@@ -106,3 +106,16 @@ class TestValidationPassed(TestCase):
         result = any_model(ModelWithValidation)
         validate_even(result.even_field)
 
+
+class ModelWithFileField(models.Model):
+    content = models.FielField(upload_to='.')
+
+    class Meta:
+        app_label = 'django_any'
+
+
+class TestFilesFields(TestCase):
+    def test_model_with_filefield_save_success(self):
+        result = any_model(ModelWithFileField)
+        result.save()
+
