@@ -40,6 +40,7 @@ class ExtensionMethod(object):
     """
     def __init__(self):
         self.registry = {}
+        self.default = None
 
     def register(self, field_type, impl=None):
         """
@@ -55,6 +56,10 @@ class ExtensionMethod(object):
             return _wrapper(impl)
         return _wrapper
     
+    def register_default(self, func):
+        self.default = func
+        return func
+
     def decorator(self, impl):
         """
         Decorator for register decorators
@@ -66,7 +71,7 @@ class ExtensionMethod(object):
         """
         Lowest value generator.
 
-        Separated from __call__, becouse it seems that python
+        Separated from __call__, because it seems that python
         cache __call__ reference on module import
         """
         if not len(args):
@@ -74,7 +79,7 @@ class ExtensionMethod(object):
 
         field_type = args[0].__class__
 
-        function = self.registry.get(field_type)
+        function = self.registry.get(field_type, self.default)
 
         if function is None:
             raise TypeError("no match %s" % field_type)

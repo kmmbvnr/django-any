@@ -16,6 +16,7 @@ from django_any.functions import valid_choices, split_model_kwargs, \
     ExtensionMethod
 
 any_field = ExtensionMethod()
+any_model = ExtensionMethod()
 
 @any_field.decorator
 def any_field_blank(function):
@@ -410,7 +411,8 @@ def _fill_model_fields(model, **kwargs):
             setattr(model, field.name, any_field(field, **fields_args[field.name]))
 
 
-def any_model(model_cls, **kwargs):
+@any_model.register_default
+def any_model_default(model_cls, **kwargs):
     result = model_cls()
 
     attempts = 10
