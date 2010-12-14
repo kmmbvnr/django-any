@@ -186,6 +186,32 @@ def any_float_field(field, **kwargs):
     return xunit.any_float(min_value=1, max_value=100, precision=3)
 
 
+@any_field.register(models.FileField)
+def any_file_field(field, **kwargs):
+    """
+    Lookup for nearest existing file
+    >>> result = any_field(models.FileField(upload_to='.'))
+    >>> result is None
+    False
+    """
+    def get_some_file(path):
+        subdirs, files = field.storage.listdir(path)
+        if files:
+            result_file = random.choice(files)
+            return field.storage.open("%s/%s" % (path, result_file))
+
+        for subdir in subdirs:
+            result = get_some_file("%s/%s" % (path, subdir))
+            if result:
+                return result
+            
+    result = get_some_file(field.upload_to)
+
+    if result is None and not field.none:
+        raise TypeError("Can't found file in %s for non nullable FileField" % field.upload_to)
+    return result
+
+
 @any_field.register(models.IPAddressField)
 def any_ipaddress_field(field, **kwargs):
     """

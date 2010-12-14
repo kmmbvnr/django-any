@@ -1,3 +1,7 @@
+import os
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
 PROJECT_APPS = ('django_any',)
 INSTALLED_APPS = ( 'django.contrib.auth',
                    'django.contrib.contenttypes',
@@ -10,7 +14,7 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.load_template_source',
 )
 ROOT_URLCONF = 'tests.test_runner'
-
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 
 if __name__ == "__main__":
     import sys, test_runner as settings

@@ -12,5 +12,5 @@ class TestsWithCustomSeed(TestCase):
     def test_deterministic_string(self):
         media = models.CharField(max_length=25)
         result = any_field(media)
-        self.assertEqual('SNnz1', result)
+        self.assertEqual('SNnz', result)
 
