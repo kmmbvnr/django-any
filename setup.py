@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-any',
-    version='0.0.1',
+    version='0.1.0',
     description='Unobtrusive test models  creation for django.',
     author='Mikhail Podgurskiy',
     author_email='kmmbvnr@gmail.com',

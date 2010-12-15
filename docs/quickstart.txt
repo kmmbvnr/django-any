@@ -1,0 +1,71 @@
+Quickstart
+==========
+
+django-any the explicit replacement for old-style, big and error-prone
+implicit fixture files.
+
+django-any allows to specify only fields important for test,
+and fill rest by random with acceptable values.
+
+
+Basic features
+--------------
+
+You could get saved in db model instance without specify
+any model fields
+
+    from django_any import any_model
+    user = any_model(User)
+
+django-any will preserve all field constrants, such as max_length,
+and choices when filling models with random data.
+
+django-any supports the same `double-underscore` syntax as django orm,
+for setting subfields values
+
+    order = any_model(Order, user__is_active = True)
+
+You could use Q objects, for selection values for fields from fixtures
+
+     order = any_model(Order, customer__location=Q(country='US'))
+
+
+Debugging
+---------
+
+It is recomended to specify django_any.WithTestDataSeed as metaclass
+for your TestCase
+
+    from django_any import any_model, WithTestDataSeed
+
+    class SiteTests(TestCase):
+        __metaclass__ = WithTestDataSeed
+
+        def test_something(self):
+            ....
+
+If you test sometimes fails, in error log, you could found used
+random seed
+
+
+    ======================================================================
+    FAIL: test__something (mysite.SiteTests) With seed 1434556623
+
+
+You could use this seed, to reapeat and debug you tests, with exactly
+the same random data
+
+
+    from django_any import any_model, WithTestDataSeed, with_seed, without_random_seed
+
+    class SiteTests(TestCase):
+        __metaclass__ = WithTestDataSeed
+
+        @without_random_seed
+        @with_seed(1434556623)
+        def test_something(self):
+            ....
+
+
+`without_random_seed` decorator disables test run with random seed, and
+`with_seed` runs test with selected seed.

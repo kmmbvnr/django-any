@@ -1,0 +1,5 @@
+include LICENSE
+include README
+include MANIFEST.in
+include django_hudson/management/commands/pylint.rc
+recursive-include docs *
