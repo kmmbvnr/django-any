@@ -52,7 +52,7 @@ random seed
     FAIL: test__something (mysite.SiteTests) With seed 1434556623
 
 
-You could use this seed, to reapeat and debug you tests, with exactly
+You could use this seed, to repeat and debug you tests, with exactly
 the same random data
 
 
