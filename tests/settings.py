@@ -8,7 +8,7 @@ INSTALLED_APPS = ( 'django.contrib.auth',
                    'django.contrib.sessions',
                    'django.contrib.sites',
                    'django.contrib.admin',
-                   'django_hudson',) + PROJECT_APPS
+                   'django_jenkins',) + PROJECT_APPS
 DATABASE_ENGINE = 'sqlite3'
 TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.load_template_source',
