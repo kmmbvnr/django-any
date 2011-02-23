@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.test import TestCase
 from django_any import any_model, xunit
-from django_any.functions import split_model_kwargs
+from django_any.test import WithTestDataSeed, without_random_seed, with_seed
 
 class SimpleModel(models.Model):
     name = models.CharField(max_length=5)
@@ -158,6 +157,15 @@ class TestValidationPassed(TestCase):
         result = any_model(ModelWithValidation)
         validate_even(result.even_field)
 
+
+class TestAnyModelFieldConstraints(TestCase):
+    __metaclass__ = WithTestDataSeed
+
+    @without_random_seed
+    @with_seed(1)
+    def test_char_min_length(self):
+        result = any_model(SimpleModel, name__min_length=3)
+        self.assertTrue(len(result.name) >= 3)
 
 # Disabled, since it is require local files
 #class TestFilesFields(TestCase):

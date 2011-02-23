@@ -95,7 +95,9 @@ def any_char_field(field, **kwargs):
     >>> type(result)
     <type 'str'>
     """
-    return xunit.any_string(min_length=1, max_length=field.max_length)
+    min_length = kwargs.get('min_length', 1)
+    max_length = kwargs.get('max_length', field.max_length)
+    return xunit.any_string(min_length=min_length, max_length=max_length)
 
 
 @any_field.register(models.CommaSeparatedIntegerField)
