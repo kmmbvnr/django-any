@@ -5,12 +5,15 @@ Values generators for common Django Fields
 """
 import re, os, random
 from decimal import Decimal
-from datetime import date, datetime
+from datetime import date, datetime, time
+from string import ascii_letters, digits
+from random import choice
 
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
 from django.db.models import Q
 from django.db.models.fields.files import FieldFile
+from django.contrib.webdesign.lorem_ipsum import paragraphs
 
 from django_any import xunit
 from django_any.functions import valid_choices, split_model_kwargs, \
@@ -182,7 +185,6 @@ def any_email_field(field, **kwargs):
     >>> result = any_field(models.EmailField())
     >>> type(result)
     <type 'str'>
-    >>> import re
     >>> re.match(r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)", result, re.IGNORECASE) is not None
     True
     """
@@ -271,7 +273,6 @@ def any_ipaddress_field(field, **kwargs):
     >>> type(result)
     <type 'str'>
     >>> from django.core.validators import ipv4_re
-    >>> import re
     >>> re.match(ipv4_re, result) is not None
     True
     """
@@ -313,11 +314,9 @@ def any_slug_field(field, **kwargs):
     >>> type(result)
     <type 'str'>
     >>> from django.core.validators import slug_re
-    >>> import re
     >>> re.match(slug_re, result) is not None
     True
     """
-    from string import ascii_letters, digits
     letters = ascii_letters + digits + '_-'
     return xunit.any_string(letters = letters, max_length = field.max_length)
 
@@ -359,7 +358,6 @@ def any_text_field(field, **kwargs):
     >>> result[0] == COMMON_P
     True
     """
-    from django.contrib.webdesign.lorem_ipsum import paragraphs
     return paragraphs(10)
 
 
@@ -369,12 +367,9 @@ def any_url_field(field, **kwargs):
     Return random value for URLField
     >>> result = any_field(models.URLField())
     >>> from django.core.validators import URLValidator
-    >>> import re
     >>> re.match(URLValidator.regex, result) is not None
     True
     """
-    from random import choice
-
     url = ['http://news.yandex.ru/society.html',
            'http://video.google.com/?hl=en&tab=wv',
            'http://www.microsoft.com/en/us/default.aspx',
@@ -394,10 +389,8 @@ def any_time_field(field, **kwargs):
     >>> result = any_field(models.TimeField())
     >>> type(result)
     <type 'datetime.time'>
-
     """
-    import datetime
-    return datetime.time(
+    return time(
         xunit.any_int(min_value=0, max_value=23),
         xunit.any_int(min_value=0, max_value=59),
         xunit.any_int(min_value=0, max_value=59))
