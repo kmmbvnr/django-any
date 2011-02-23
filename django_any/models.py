@@ -3,8 +3,9 @@
 """
 Values generators for common Django Fields
 """
-import os, random
+import re, os, random
 from decimal import Decimal
+from datetime import date, datetime
 
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
@@ -24,6 +25,9 @@ def any_field_blank(function):
     Sometimes return None if field could be blank
     """
     def wrapper(field, **kwargs):
+        if kwargs.get('isnull', False):
+            return None
+    
         if field.blank and random.random < 0.1:
             return None
         return function(field, **kwargs)
@@ -57,7 +61,9 @@ def any_biginteger_field(field, **kwargs):
     >>> type(result)
     <type 'long'>
     """
-    return long(xunit.any_int(min_value=1, max_value=10**20))
+    min_value = kwargs.get('min_value', 1)
+    max_value = kwargs.get('max_value', 10**20)
+    return long(xunit.any_int(min_value=min_value, max_value=max_value))
 
 
 @any_field.register(models.BooleanField)
@@ -83,7 +89,9 @@ def any_positiveinteger_field(field, **kwargs):
     >>> result > 0
     True
     """
-    return xunit.any_int(min_value=1, max_value=9999)
+    min_value = kwargs.get('min_value', 1)
+    max_value = kwargs.get('max_value', 9999)
+    return xunit.any_int(min_value=min_value, max_value=max_value)
 
 
 @any_field.register(models.CharField)
@@ -128,7 +136,9 @@ def any_date_field(field, **kwargs):
     """
     if field.auto_now or field.auto_now_add:
         return None
-    return xunit.any_date()
+    from_date = kwargs.get('from_date', date(1990, 1, 1))
+    to_date = kwargs.get('to_date', date.today())
+    return xunit.any_date(from_date=from_date, to_date=to_date)
 
 
 @any_field.register(models.DateTimeField)
@@ -141,7 +151,9 @@ def any_datetime_field(field, **kwargs):
     >>> type(result)
     <type 'datetime.datetime'>
     """
-    return xunit.any_datetime()
+    from_date = kwargs.get('from_date', datetime(1990, 1, 1))
+    to_date = kwargs.get('to_date', datetime.today())
+    return xunit.any_datetime(from_date=from_date, to_date=to_date)
 
 
 @any_field.register(models.DecimalField)
@@ -153,11 +165,13 @@ def any_decimal_field(field, **kwargs):
     >>> type(result)
     <class 'decimal.Decimal'>
     """
-    min_value = 0
-    max_value = Decimal('%s.%s' % ('9'*(field.max_digits-field.decimal_places),
-                                   '9'*field.decimal_places))
+    min_value = kwargs.get('min_value', 0)
+    max_value = kwargs.get('max_value',
+                           Decimal('%s.%s' % ('9'*(field.max_digits-field.decimal_places),
+                                              '9'*field.decimal_places)))
+    decimal_places = kwargs.get('decimal_places', field.decimal_places)
     return xunit.any_decimal(min_value=min_value, max_value=max_value,
-                             decimal_places = field.decimal_places)
+                             decimal_places = decimal_places)
 
 
 @any_field.register(models.EmailField)
@@ -186,7 +200,10 @@ def any_float_field(field, **kwargs):
     >>> type(result)
     <type 'float'>
     """
-    return xunit.any_float(min_value=1, max_value=100, precision=3)
+    min_value = kwargs.get('min_value', 1)
+    max_value = kwargs.get('max_value', 100)
+    precision = kwargs.get('precision', 3)
+    return xunit.any_float(min_value=min_value, max_value=max_value, precision=precision)
 
 
 @any_field.register(models.FileField)
@@ -283,7 +300,9 @@ def any_positivesmallinteger_field(field, **kwargs):
     >>> result < 256, result > 0
     (True, True)
     """
-    return xunit.any_int(min_value=1, max_value=255)
+    min_value = kwargs.get('min_value', 1)
+    max_value = kwargs.get('max_value', 255)
+    return xunit.any_int(min_value=min_value, max_value=max_value)
 
 
 @any_field.register(models.SlugField)
@@ -313,7 +332,9 @@ def any_smallinteger_field(field, **kwargs):
     >>> result > -256, result < 256
     (True, True)
     """
-    return xunit.any_int(min_value=-255, max_value=255)
+    min_value = kwargs.get('min_value', -255)
+    max_value = kwargs.get('max_value', 255)
+    return xunit.any_int(min_value=min_value, max_value=max_value)
 
 
 @any_field.register(models.IntegerField)
@@ -324,7 +345,9 @@ def any_integer_field(field, **kwargs):
     >>> type(result)
     <type 'int'>
     """
-    return xunit.any_int(min_value=-10000, max_value=10000)
+    min_value = kwargs.get('min_value', -10000)
+    max_value = kwargs.get('max_value', 10000)
+    return xunit.any_int(min_value=min_value, max_value=max_value)
 
 
 @any_field.register(models.TextField)
@@ -350,6 +373,8 @@ def any_url_field(field, **kwargs):
     >>> re.match(URLValidator.regex, result) is not None
     True
     """
+    from random import choice
+
     url = ['http://news.yandex.ru/society.html',
            'http://video.google.com/?hl=en&tab=wv',
            'http://www.microsoft.com/en/us/default.aspx',
@@ -358,7 +383,7 @@ def any_url_field(field, **kwargs):
            'http://localhost/',
            'http://72.14.221.99',
            'http://fr.wikipedia.org/wiki/France']
-    from random import choice
+    url = kwargs.get('url', url)
     return choice(url)
 
 
