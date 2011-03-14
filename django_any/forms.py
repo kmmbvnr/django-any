@@ -47,6 +47,19 @@ def field_required_attribute(function):
     return _wrapper
 
 
+@any_form_field.decorator
+def field_choices_attibute(function):
+    """
+    Selection from field.choices
+    """
+    def _wrapper(field, **kwargs):
+        if hasattr(field.widget, 'choices'):
+            return random.choice(list(valid_choices(field.widget.choices)))
+        return function(field, **kwargs)
+
+    return _wrapper
+
+
 @any_form_field.register(forms.BooleanField)
 def boolean_field_data(field, **kwargs):
     """
@@ -226,8 +239,8 @@ def null_boolean_field_data(field, **kwargs):
     
     >>> result = any_form_field(forms.NullBooleanField())
     >>> type(result)
-    <type 'str'>
-    >>> result in ['None', 'True', 'False']
+    <type 'unicode'>
+    >>> result in [u'1', u'2', u'3']
     True
     """
     return random.choice(['None', 'True', 'False'])
@@ -335,4 +348,16 @@ def multiple_choice_field_data(field, **kwargs):
             choices.append(l[i])
         return ' '.join(choices)
     return 'None'
+
+
+@any_form_field.register(forms.models.ModelChoiceField)
+def model_choice_field_data(field, **kwargs):
+    """
+    Return one of first ten items for field queryset
+    """
+    data = list(field.queryset[:10])
+    if data:
+        return random.choice(data)
+    else:
+        raise TypeError('No %s available in queryset' % field.queryset.model)
 

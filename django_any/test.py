@@ -8,21 +8,28 @@ from django_any.contrib.auth import any_user
 from django.contrib.admin.helpers import AdminForm
 from django_any import xunit
 
+
+def _context_keys_iterator(context):
+    for container_or_key in context:
+        if isinstance(container_or_key, basestring):
+            yield container_or_key
+        else:
+            for key in _context_keys_iterator(container_or_key):
+                yield key
+
+
 def _request_context_forms(context):
     """
     Lookup all stored in context froms instance
     """
-    if isinstance(context, list):
-        dicts = context[0].dicts
-    else:
-        dicts = context.dicts
-
-    for context in dicts:
-        for _, inst in context.items():
-            if isinstance(inst, forms.Form):
-                yield inst
-            elif isinstance(inst, AdminForm):
-                yield inst.form
+    for key in _context_keys_iterator(context):
+        inst = context[key]
+        if isinstance(inst, (forms.Form, forms.ModelForm)):
+            yield inst
+        elif isinstance(inst,  forms.formsets.BaseFormSet):
+            yield inst
+        elif isinstance(inst, AdminForm):
+            yield inst.form
 
 
 class Client(DjangoClient):
@@ -41,7 +48,12 @@ class Client(DjangoClient):
 
         #TODO support string and list of strings as forms names in context
         for form in context_forms(request.context):
-            form_data, form_files = any_form(form.__class__) #TODO support form instance
+            if isinstance(form, forms.formsets.BaseFormSet): # TODO any_form ExtensionMethod
+                #TODO support formset data
+                form_data = form.management_form.initial
+                form_data['MAX_NUM_FORMS'] = 0
+            else:
+                form_data, form_files = any_form(form.__class__, **kwargs) #TODO support form instance
 
             if form.prefix:
                 form_data = dict([('%s-%s' % (form.prefix, key), value) for key, value in form_data.items()])
