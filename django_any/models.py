@@ -408,6 +408,8 @@ def any_onetoone_field(field, **kwargs):
 
 def _fill_model_fields(model, **kwargs):
     model_fields, fields_args = split_model_kwargs(kwargs)
+
+    # fill local fields
     for field in model._meta.fields:
         if field.name in model_fields:
             if isinstance(kwargs[field.name], Q):
@@ -418,6 +420,7 @@ def _fill_model_fields(model, **kwargs):
                 value = key_field.rel.to.objects.get(kwargs[field.name])
                 setattr(model, field.name, value)
             else:
+                # TODO support any_model call
                 setattr(model, field.name, kwargs[field.name])
         elif isinstance(field, models.OneToOneField) and field.rel.parent_link:
             """
@@ -429,6 +432,15 @@ def _fill_model_fields(model, **kwargs):
             """
         else:
             setattr(model, field.name, any_field(field, **fields_args[field.name]))
+
+    # procceed reversed relations
+    onetoone = [(relation.var_name, relation.field) \
+                for relation in model._meta.get_all_related_objects() \
+                if relation.field.unique] # TODO and not relation.field.rel.parent_link ??
+    for field_name, field in onetoone:
+        if field_name in model_fields:
+            # TODO support any_model call
+            setattr(model, field_name, kwargs[field_name])
 
 
 @any_model.register_default

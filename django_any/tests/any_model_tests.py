@@ -120,6 +120,16 @@ class TestAnyModel(TestCase):
         self.assertTrue(result.name is not None)
         self.assertTrue(result.simple.name is not None)
 
+    def test_related_onetoone_not_created_by_default(self):
+        simple_model = any_model(SimpleModel)        
+        self.assertRaises(ModelWithOneToOneField.DoesNotExist, lambda : simple_model.modelwithonetoonefield)
+
+    def test_related_onetoone_explicit_specification_succeed(self):
+        related_model = any_model(ModelWithOneToOneField)
+        simple_model = any_model(SimpleModel, modelwithonetoonefield = related_model)
+        self.assertTrue(simple_model.modelwithonetoonefield is not None)
+        self.assertEqual(simple_model, simple_model.modelwithonetoonefield.simple)
+
     def test_set_nested_fields(self):
         result = any_model(ModelWithForeignKey, simple__name='Name')
         self.assertEqual('Name', result.simple.name)
@@ -166,6 +176,7 @@ class TestAnyModelFieldConstraints(TestCase):
     def test_char_min_length(self):
         result = any_model(SimpleModel, name__min_length=3)
         self.assertTrue(len(result.name) >= 3)
+
 
 # Disabled, since it is require local files
 #class TestFilesFields(TestCase):
