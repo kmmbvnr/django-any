@@ -5,17 +5,21 @@ Django forms data generators
 
 """
 import random
+from datetime import date, datetime, time
 from django import forms
+from django.utils import formats
 from django_any import xunit
 from django_any.functions import valid_choices, split_model_kwargs, \
     ExtensionMethod
 
+any_form = ExtensionMethod()
 any_form_field = ExtensionMethod()
 
 
-def any_form(form_cls, **kwargs):
+@any_form.register_default
+def any_form_default(form_cls, **kwargs):
     """
-    Returns tuple of form data and files
+    Returns tuple with form data and files
     """
     form_data = {}
     form_files = {}
@@ -26,7 +30,7 @@ def any_form(form_cls, **kwargs):
         if name in form_fields:
             form_data[name] = kwargs[name]
         else:
-            form_data[name] = any_form_field(field)
+            form_data[name] = any_form_field(field, **fields_args[name])
 
     return form_data, form_files
 
@@ -80,8 +84,10 @@ def char_field_data(field, **kwargs):
     >>> type(result)
     <type 'str'>
     """
-    return xunit.any_string(min_length=field.min_length or 1, 
-                            max_length=field.max_length or 255)
+    min_length = kwargs.get('min_length', 1)
+    max_length = kwargs.get('max_length', field.max_length or 255)    
+    return xunit.any_string(min_length=field.min_length or min_length, 
+                            max_length=field.max_length or max_length)
 
 
 @any_form_field.register(forms.DecimalField)
@@ -109,6 +115,10 @@ def decimal_field_data(field, **kwargs):
         max_value = min(max_value,
                         Decimal('%s.%s' % ('9'*(field.max_digits-field.decimal_places),
                                            '9'*field.decimal_places)))
+
+    min_value = kwargs.get('min_value') or min_value
+    max_value = kwargs.get('max_value') or max_value
+
     return str(xunit.any_decimal(min_value=min_value,
                              max_value=max_value,
                              decimal_places = field.decimal_places or 2))
@@ -146,12 +156,12 @@ def date_field_data(field, **kwargs):
     >>> type(result)
     <type 'str'>
     """
-    date = xunit.any_date()
-    if field.input_formats:
-        date = date.strftime(field.input_formats)
-    else:
-        date = date.strftime('%Y-%m-%d')
-    return date
+    from_date = kwargs.get('from_date', date(1990, 1, 1))
+    to_date = kwargs.get('to_date', date.today())
+    
+    date_format = random.choice(field.input_formats or formats.get_format('DATE_INPUT_FORMATS'))
+                                
+    return xunit.any_date(from_date=from_date, to_date=to_date).strftime(date_format)
 
 
 @any_form_field.register(forms.DateTimeField)
@@ -163,12 +173,10 @@ def datetime_field_data(field, **kwargs):
     >>> type(result)
     <type 'str'>
     """
-    datetime = xunit.any_datetime()
-    if field.input_formats:
-        datetime = datetime.strftime(field.input_formats)
-    else:
-        datetime = datetime.strftime('%Y-%m-%d %H:%M:%S')
-    return datetime
+    from_date = kwargs.get('from_date', datetime(1990, 1, 1))
+    to_date = kwargs.get('to_date', datetime.today())
+    date_format = random.choice(field.input_formats or formats.get_format('DATETIME_INPUT_FORMATS'))
+    return xunit.any_datetime(from_date=from_date, to_date=to_date).strftime(date_format)
 
 
 @any_form_field.register(forms.FloatField)
@@ -184,13 +192,18 @@ def float_field_data(field, **kwargs):
     """
     min_value = 0
     max_value = 100
-    from django.core.validators import MinValueValidator, MaxValueValidator 
+    from django.core.validators import MinValueValidator, MaxValueValidator
     for elem in field.validators:
         if isinstance(elem, MinValueValidator):
             min_value = elem.limit_value
         if isinstance(elem, MaxValueValidator):
             max_value = elem.limit_value
-    return str(xunit.any_float(min_value=min_value, max_value=max_value, precision=3))
+
+    min_value = kwargs.get('min_value', min_value)
+    max_value = kwargs.get('max_value', max_value)
+    precision = kwargs.get('precision', 3)
+
+    return str(xunit.any_float(min_value=min_value, max_value=max_value, precision=precision))
 
 
 @any_form_field.register(forms.IntegerField)
@@ -212,6 +225,10 @@ def integer_field_data(field, **kwargs):
             min_value = elem.limit_value
         if isinstance(elem, MaxValueValidator):
             max_value = elem.limit_value
+
+    min_value = kwargs.get('min_value', min_value)
+    max_value = kwargs.get('max_value', max_value)
+
     return str(xunit.any_int(min_value=min_value, max_value=max_value))
 
 
@@ -228,8 +245,12 @@ def ipaddress_field_data(field, **kwargs):
     >>> re.match(ipv4_re, result) is not None
     True
     """
-    nums = [str(xunit.any_int(min_value=0, max_value=255)) for _ in xrange(0, 4)]
-    return ".".join(nums)
+    choices = kwargs.get('choices')
+    if choices:
+        return random.choice(choices)
+    else:
+        nums = [str(xunit.any_int(min_value=0, max_value=255)) for _ in xrange(0, 4)]
+        return ".".join(nums)
 
 
 @any_form_field.register(forms.NullBooleanField)
@@ -259,9 +280,12 @@ def slug_field_data(field, **kwargs):
     >>> re.match(slug_re, result) is not None
     True
     """
+    min_length = kwargs.get('min_length', 1)
+    max_length = kwargs.get('max_length', field.max_length or 20)    
+    
     from string import ascii_letters, digits
     letters = ascii_letters + digits + '_-' 
-    return xunit.any_string(letters = letters, max_length = 20)
+    return xunit.any_string(letters = letters, min_length = min_length, max_length = max_length)
 
 
 @any_form_field.register(forms.URLField)
@@ -275,16 +299,17 @@ def url_field_data(field, **kwargs):
     >>> re.match(URLValidator.regex, result) is not None
     True
     """
-    url = ['http://news.yandex.ru/society.html',
-           'http://video.google.com/?hl=en&tab=wv',
-           'http://www.microsoft.com/en/us/default.aspx',
-           'http://habrahabr.ru/company/opera/',
-           'http://www.apple.com/support/hardware/',
-           'http://localhost/',
-           'http://72.14.221.99',
-           'http://fr.wikipedia.org/wiki/France']
-    from random import choice
-    return choice(url)
+    urls = kwargs.get('choices',
+                      ['http://news.yandex.ru/society.html',
+                       'http://video.google.com/?hl=en&tab=wv',
+                       'http://www.microsoft.com/en/us/default.aspx',
+                       'http://habrahabr.ru/company/opera/',
+                       'http://www.apple.com/support/hardware/',
+                                        'http://localhost/',
+                       'http://72.14.221.99',
+                       'http://fr.wikipedia.org/wiki/France'])
+
+    return random.choice(urls)
 
 
 @any_form_field.register(forms.TimeField)
@@ -296,15 +321,11 @@ def time_field_data(field, **kwargs):
     >>> type(result)
     <type 'str'>
     """
-    import datetime
-    time = datetime.time(xunit.any_int(min_value=0, max_value=23),
-                         xunit.any_int(min_value=0, max_value=59),
-                         xunit.any_int(min_value=0, max_value=59))
-    if field.input_formats:
-        time = time.strftime(field.input_formats)
-    else:
-        time = time.strftime('%H:%M:%S')
-    return time
+    time_format = random.choice(field.input_formats or formats.get_format('TIME_INPUT_FORMATS'))
+
+    return time(xunit.any_int(min_value=0, max_value=23),
+                xunit.any_int(min_value=0, max_value=59),
+                xunit.any_int(min_value=0, max_value=59)).strftime(time_format)
 
 
 @any_form_field.register(forms.TypedChoiceField)
