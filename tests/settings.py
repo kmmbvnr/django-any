@@ -2,6 +2,7 @@ import os
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+SITE_ID=1
 PROJECT_APPS = ('django_any',)
 INSTALLED_APPS = ( 'django.contrib.auth',
                    'django.contrib.contenttypes',
