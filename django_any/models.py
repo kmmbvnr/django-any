@@ -10,6 +10,7 @@ from string import ascii_letters, digits
 from random import choice
 
 from django.core.exceptions import ValidationError
+from django.core import validators
 from django.db import models, IntegrityError
 from django.db.models import Q
 from django.db.models.fields.files import FieldFile
@@ -370,16 +371,28 @@ def any_url_field(field, **kwargs):
     >>> re.match(URLValidator.regex, result) is not None
     True
     """
-    url = ['http://news.yandex.ru/society.html',
-           'http://video.google.com/?hl=en&tab=wv',
-           'http://www.microsoft.com/en/us/default.aspx',
-           'http://habrahabr.ru/company/opera/',
-           'http://www.apple.com/support/hardware/',
-           'http://ya.ru',
-           'http://google.com',
-           'http://fr.wikipedia.org/wiki/France']
-    url = kwargs.get('url', url)
-    return choice(url)
+    url = kwargs.get('url')
+
+    if not url:
+        verified = [validator for validator in field.validators \
+                    if isinstance(validator, validators.URLValidator) and \
+                    validator.verify_exists == True]
+        if verified:
+            url = choice(['http://news.yandex.ru/society.html',
+                          'http://video.google.com/?hl=en&tab=wv',
+                          'http://www.microsoft.com/en/us/default.aspx',
+                          'http://habrahabr.ru/company/opera/',
+                          'http://www.apple.com/support/hardware/',
+                          'http://ya.ru',
+                          'http://google.com',
+                          'http://fr.wikipedia.org/wiki/France'])
+        else:
+            url = "http://%s.%s/%s" % (
+                xunit.any_string(max_length=10),
+                xunit.any_string(min_length=2, max_length=3),
+                xunit.any_string(max_length=20))
+
+    return url
 
 
 @any_field.register(models.TimeField)

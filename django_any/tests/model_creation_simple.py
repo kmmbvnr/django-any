@@ -24,7 +24,7 @@ class SimpleModel(models.Model):
     slig_field = models.SlugField()
     text_field = models.TextField()
     time_field = models.TimeField()
-    url_field = models.URLField()
+    url_field = models.URLField(verify_exists=False)
 
     class Meta:
         app_label = 'django_any'
