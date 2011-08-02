@@ -20,7 +20,7 @@ from django_any.functions import valid_choices, split_model_kwargs, \
     ExtensionMethod
 
 any_field = ExtensionMethod()
-any_model = ExtensionMethod()
+any_model = ExtensionMethod(by_instance=True)
 
 @any_field.decorator
 def any_field_blank(function):
@@ -375,8 +375,8 @@ def any_url_field(field, **kwargs):
            'http://www.microsoft.com/en/us/default.aspx',
            'http://habrahabr.ru/company/opera/',
            'http://www.apple.com/support/hardware/',
-           'http://localhost/',
-           'http://72.14.221.99',
+           'http://ya.ru',
+           'http://google.com',
            'http://fr.wikipedia.org/wiki/France']
     url = kwargs.get('url', url)
     return choice(url)

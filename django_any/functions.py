@@ -38,8 +38,9 @@ class ExtensionMethod(object):
     """
     Works like one parameter multimethod
     """
-    def __init__(self):
+    def __init__(self, by_instance=False):
         self.registry = {}
+        self.by_instance = by_instance
         self.default = None
 
     def register(self, field_type, impl=None):
@@ -77,7 +78,10 @@ class ExtensionMethod(object):
         if not len(args):
             raise TypeError('Object instance is not provided')
 
-        field_type = args[0].__class__
+        if self.by_instance:
+            field_type = args[0]
+        else:
+            field_type = args[0].__class__
 
         function = self.registry.get(field_type, self.default)
 

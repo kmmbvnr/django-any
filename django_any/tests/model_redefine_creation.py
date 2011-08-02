@@ -20,14 +20,12 @@ class RelatedToRedefined(models.Model):
 
 @any_model.register(Redefined)
 def any_redefined_model(model_cls, **kwargs):
-    kwargs['name'] = kwargs.get('name', 'test')    
-    import ipdb; ipdb.set_trace()
-    return any_model.dafault(model_cls, **kwargs)
+    kwargs['name'] = kwargs.get('name', 'test')  
+    return any_model.default(model_cls, **kwargs)
 
 
 class RedefinedCreation(TestCase):
-    # TODO Fix model factory registration
-    def _test_redefined_creation(self):        
+    def test_redefined_creation(self):        
         result = any_model(Redefined)
         self.assertEqual(result.name, 'test')
 
