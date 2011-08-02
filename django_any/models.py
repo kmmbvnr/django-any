@@ -65,7 +65,7 @@ def any_biginteger_field(field, **kwargs):
     <type 'long'>
     """
     min_value = kwargs.get('min_value', 1)
-    max_value = kwargs.get('max_value', 10**20)
+    max_value = kwargs.get('max_value', 10**10)
     return long(xunit.any_int(min_value=min_value, max_value=max_value))
 
 
